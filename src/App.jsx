@@ -1,0 +1,1415 @@
+import { useEffect, useState } from 'react'
+
+const colors = {
+  background: '#111113',
+  card: '#19191d',
+  cardHover: '#1e1e23',
+  accent: '#e8622c',
+  accentDark: '#9e3a16',
+  accentLight: '#f2854f',
+  accentGlow: 'rgba(232,98,44,0.15)',
+  text: '#c8c5be',
+  muted: '#7d7a72',
+  light: '#f0ede8',
+  border: 'rgba(255,255,255,0.06)',
+}
+
+const sections = [
+  { id: 'home', label: 'Home' },
+  { id: 'about', label: 'About' },
+  { id: 'services', label: 'Services' },
+  { id: 'stack', label: 'Stack' },
+  { id: 'projects', label: 'Projects' },
+  { id: 'reviews', label: 'Reviews' },
+  { id: 'contact', label: 'Contact' },
+]
+
+const animatedSectionIds = ['about', 'services', 'stack', 'projects', 'reviews', 'contact', 'footer']
+
+const services = [
+  {
+    title: '⚡ MVP Development',
+    text: 'From idea to launch in days, not months. Rapid prototyping with modern no-code & vibe coding tools.',
+  },
+  {
+    title: '🧩 SaaS Platforms',
+    text: 'Subscription apps, client portals, admin dashboards with auth, payments & real-time data.',
+  },
+  {
+    title: '🤖 AI-Powered Apps',
+    text: 'GPT/Claude-integrated tools, chatbots, AI copilots, RAG systems & knowledge bases.',
+  },
+  {
+    title: '🔧 Internal Tools',
+    text: 'Custom CRMs, reporting panels, workflow tools tailored to your business needs.',
+  },
+  {
+    title: '🔄 AI Automations',
+    text: 'n8n, Make, Zapier pipelines & marketing automation connected to your app.',
+  },
+  {
+    title: '🔗 API Integrations',
+    text: 'Stripe, Twilio, Google APIs, and third-party services wired into your product.',
+  },
+]
+
+const techStackCategories = [
+  {
+    category: 'No-Code / Vibe Coding',
+    tools: ['Lovable.dev', 'Replit', 'Bolt.new', 'Base44', 'Cursor', 'Windsurf', 'v0.dev', 'GitHub Copilot'],
+  },
+  {
+    category: 'Backend & Database',
+    tools: ['Supabase', 'Firebase', 'PostgreSQL', 'MongoDB'],
+  },
+  {
+    category: 'AI & LLM',
+    tools: ['OpenAI GPT', 'Anthropic Claude', 'AI Agents', 'RAG Systems'],
+  },
+  {
+    category: 'Automation',
+    tools: ['n8n', 'Make', 'Zapier', 'Power Automate', 'Axiom.ai', 'Airtable'],
+  },
+  {
+    category: 'APIs & Payments',
+    tools: ['Stripe', 'Google APIs', 'Twilio', 'REST APIs'],
+  },
+]
+
+const projects = [
+  {
+    name: 'AI Customer Support Platform',
+    categories: ['SaaS', 'AI', 'Automation'],
+    summary: 'Built a full-stack SaaS platform with GPT-powered chatbot, ticket management, and automated escalation workflows using n8n.',
+    tech: ['Lovable.dev', 'Supabase', 'OpenAI', 'n8n', 'Stripe'],
+  },
+  {
+    name: 'Lead Generation Dashboard',
+    categories: ['Internal Tool', 'CRM'],
+    summary: 'Custom CRM dashboard with real-time analytics, lead scoring powered by AI, and automated email sequences via Make.',
+    tech: ['Replit', 'PostgreSQL', 'Claude API', 'Make'],
+  },
+  {
+    name: 'E-Commerce MVP',
+    categories: ['MVP', 'Payments'],
+    summary: 'Launched a marketplace MVP in 5 days with Stripe payments, vendor management, and automated order notifications.',
+    tech: ['Bolt.new', 'Firebase', 'Stripe', 'Zapier'],
+  },
+  {
+    name: 'Document AI Processor',
+    categories: ['AI', 'RAG', 'Automation'],
+    summary: 'AI-powered document processing tool with RAG system for intelligent search across company knowledge bases.',
+    tech: ['Base44', 'Supabase', 'OpenAI', 'Webhooks'],
+  },
+]
+
+const reviews = [
+  {
+    quote: 'Delivered our MVP in just one week. The quality was production-ready from day one. Absolutely exceeded expectations.',
+    person: 'Sarah M.',
+    role: 'Startup Founder',
+    rating: 5,
+  },
+  {
+    quote: 'The AI automation workflows he built saved us 20+ hours per week. Best investment we\'ve made this year.',
+    person: 'James K.',
+    role: 'Agency Owner',
+    rating: 5,
+  },
+  {
+    quote: 'Professional, fast, and proactive. He didn\'t just build what we asked — he suggested improvements we hadn\'t thought of.',
+    person: 'Lisa R.',
+    role: 'Product Manager',
+    rating: 5,
+  },
+]
+
+function App() {
+  const [hoveredCard, setHoveredCard] = useState(null)
+  const [activeSection, setActiveSection] = useState('home')
+  const [scrolled, setScrolled] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const [isTablet, setIsTablet] = useState(false)
+  const [isTouch, setIsTouch] = useState(false)
+  const [mouseGlowPosition, setMouseGlowPosition] = useState({ x: 0, y: 0 })
+  const [revealedSections, setRevealedSections] = useState({})
+  const [hoveredService, setHoveredService] = useState(null)
+  const [hoveredTool, setHoveredTool] = useState('')
+
+  useEffect(() => {
+    document.documentElement.style.scrollBehavior = 'smooth'
+
+    const sectionIds = sections.map((section) => section.id)
+
+    const updateState = () => {
+      setScrolled(window.scrollY > 8)
+      const width = window.innerWidth
+      setIsMobile(width < 768)
+      setIsTablet(width >= 768 && width < 1024)
+
+      const probe = window.scrollY + window.innerHeight * 0.35
+      let current = 'home'
+
+      sectionIds.forEach((sectionId) => {
+        const element = document.getElementById(sectionId)
+
+        if (!element) {
+          return
+        }
+
+        const top = element.offsetTop
+        const bottom = top + element.offsetHeight
+
+        if (probe >= top && probe < bottom) {
+          current = sectionId
+        }
+      })
+
+      setActiveSection(current)
+    }
+
+    let updateMouseGlowScheduled = false
+    const updateMouseGlow = (event) => {
+      if (updateMouseGlowScheduled) {
+        return
+      }
+      updateMouseGlowScheduled = true
+      setTimeout(() => {
+        setMouseGlowPosition({ x: event.clientX, y: event.clientY })
+        updateMouseGlowScheduled = false
+      }, 16)
+    }
+
+    updateState()
+    setMouseGlowPosition({ x: window.innerWidth * 0.5, y: window.innerHeight * 0.3 })
+    
+    // Detect touch capability
+    const isTouchDevice = () => {
+      return (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0))
+    }
+    setIsTouch(isTouchDevice())
+    
+    window.addEventListener('scroll', updateState, { passive: true })
+    window.addEventListener('resize', updateState)
+    window.addEventListener('mousemove', updateMouseGlow)
+
+    return () => {
+      document.documentElement.style.scrollBehavior = ''
+      window.removeEventListener('scroll', updateState)
+      window.removeEventListener('resize', updateState)
+      window.removeEventListener('mousemove', updateMouseGlow)
+    }
+  }, [])
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) {
+            return
+          }
+
+          const revealId = entry.target.getAttribute('data-reveal-id')
+
+          if (!revealId) {
+            return
+          }
+
+          setRevealedSections((previous) => {
+            if (previous[revealId]) {
+              return previous
+            }
+
+            return { ...previous, [revealId]: true }
+          })
+          observer.unobserve(entry.target)
+        })
+      },
+      {
+        threshold: 0.18,
+        rootMargin: '50px 0px 50px 0px',
+      },
+    )
+
+    animatedSectionIds.forEach((sectionId) => {
+      const target = document.querySelector(`[data-reveal-id="${sectionId}"]`)
+
+      if (target) {
+        observer.observe(target)
+      }
+    })
+
+    return () => observer.disconnect()
+  }, [])
+
+  const page = {
+    minHeight: '100vh',
+    background: colors.background,
+    color: colors.text,
+    fontFamily: 'Inter, sans-serif',
+    position: 'relative',
+    overflowX: 'hidden',
+  }
+
+  const shell = {
+    width: 'min(1200px, calc(100% - 32px))',
+    margin: '0 auto',
+  }
+
+  const cardBase = {
+    background: colors.card,
+    border: `1px solid ${colors.border}`, 
+    borderRadius: '24px',
+    boxShadow: `0 0 0 1px ${colors.accentGlow}, 0 20px 60px rgba(0,0,0,0.28)`,
+    transition: 'transform 180ms ease, background 180ms ease, border-color 180ms ease',
+  }
+
+  const sectionStyle = {
+    padding: 'clamp(40px, 8vw, 88px) 0',
+  }
+
+  const sectionLabel = {
+    fontFamily: 'JetBrains Mono, monospace',
+    fontSize: 'clamp(0.70rem, 1.5vw, 0.78rem)',
+    letterSpacing: '0.14em',
+    textTransform: 'uppercase',
+    color: colors.accentLight,
+    marginBottom: 'clamp(12px, 2vw, 18px)',
+  }
+
+  const heading = {
+    margin: 0,
+    color: colors.light,
+    lineHeight: 1,
+    letterSpacing: '-0.05em',
+    fontSize: 'clamp(1.8rem, 5vw, 3.2rem)',
+  }
+
+  const navLink = {
+    color: colors.text,
+    textDecoration: 'none',
+    fontSize: '12px',
+    fontWeight: 600,
+    letterSpacing: '0.4px',
+    textTransform: 'uppercase',
+    padding: '10px 12px',
+    borderRadius: '999px',
+    border: `1px solid transparent`,
+  }
+
+  const navLinkActive = {
+    background: 'rgba(232,98,44,0.08)',
+    borderColor: colors.accent,
+    color: colors.light,
+  }
+
+  const navigateToSection = (sectionId) => (event) => {
+    event.preventDefault()
+
+    const target = document.getElementById(sectionId)
+
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+
+    setMobileMenuOpen(false)
+  }
+
+  const navItems = sections
+
+  const getRevealStyle = (sectionId) => ({
+    opacity: revealedSections[sectionId] ? 1 : 0,
+    transform: revealedSections[sectionId] ? 'translateY(0)' : 'translateY(60px)',
+    transition: 'opacity 720ms ease, transform 720ms cubic-bezier(0.22, 1, 0.36, 1)',
+    willChange: 'opacity, transform',
+  })
+
+  return (
+    <div style={page}>
+      <style>
+        {`
+          @keyframes profilePulse {
+            0% {
+              box-shadow: 0 0 0 0 rgba(232,98,44,0.22), 0 18px 48px rgba(232,98,44,0.22);
+            }
+            50% {
+              box-shadow: 0 0 0 14px rgba(232,98,44,0), 0 24px 62px rgba(232,98,44,0.33);
+            }
+            100% {
+              box-shadow: 0 0 0 0 rgba(232,98,44,0.22), 0 18px 48px rgba(232,98,44,0.22);
+            }
+          }
+
+          @keyframes gradientShift {
+            0% {
+              background-position: 0% 50%;
+            }
+            100% {
+              background-position: 200% 50%;
+            }
+          }
+
+          @keyframes dotPulse {
+            0% {
+              transform: scale(0.9);
+              box-shadow: 0 0 0 0 rgba(76, 209, 111, 0.45);
+            }
+            70% {
+              transform: scale(1);
+              box-shadow: 0 0 0 9px rgba(76, 209, 111, 0);
+            }
+            100% {
+              transform: scale(0.9);
+              box-shadow: 0 0 0 0 rgba(76, 209, 111, 0);
+            }
+          }
+
+          @keyframes shineSwipe {
+            0% {
+              transform: translateX(-100%) skewX(-20deg);
+              opacity: 0;
+            }
+            50% {
+              opacity: 0.4;
+            }
+            100% {
+              transform: translateX(400%) skewX(-20deg);
+              opacity: 0;
+            }
+          }
+
+          ::selection {
+            background: rgba(232, 98, 44, 0.4);
+            color: #f0ede8;
+          }
+
+          ::-moz-selection {
+            background: rgba(232, 98, 44, 0.4);
+            color: #f0ede8;
+          }
+        `}
+      </style>
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          inset: 0,
+          pointerEvents: 'none',
+          zIndex: 1,
+          background: `radial-gradient(360px circle at ${mouseGlowPosition.x}px ${mouseGlowPosition.y}px, rgba(232,98,44,0.12), transparent 72%)`,
+          transition: 'background 80ms linear',
+        }}
+      />
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          left: 0,
+          right: 0,
+          top: 0,
+          height: '3px',
+          zIndex: 40,
+          background: `linear-gradient(90deg, ${colors.accent}, ${colors.accentLight})`,
+        }}
+      />
+      <header
+        style={{
+          position: 'fixed',
+          top: '3px',
+          left: 0,
+          right: 0,
+          zIndex: 20,
+          backdropFilter: 'blur(18px)',
+          background: scrolled ? 'rgba(17,17,19,0.88)' : 'rgba(17,17,19,0.72)',
+          borderBottom: `1px solid ${colors.border}`,
+        }}
+      >
+        <div
+          style={{
+            ...shell,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '18px 0',
+            gap: '20px',
+            position: 'relative',
+          }}
+        >
+          <a
+            href="#home"
+            onClick={navigateToSection('home')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'baseline',
+              gap: '0px',
+              color: colors.light,
+              textDecoration: 'none',
+              fontWeight: 900,
+              letterSpacing: '-1px',
+              fontSize: '24px',
+              lineHeight: 1,
+            }}
+          >
+            <span style={{ color: colors.accent }}>M</span>
+            <span>H</span>
+            <span style={{ color: colors.accent }}>I</span>
+          </a>
+          {isMobile ? (
+            <button
+              type="button"
+              aria-label="Toggle navigation menu"
+              aria-expanded={mobileMenuOpen}
+              onClick={() => setMobileMenuOpen((value) => !value)}
+              style={{
+                width: '44px',
+                height: '44px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '12px',
+                border: `1px solid ${colors.border}`,
+                background: colors.card,
+                color: colors.light,
+                cursor: 'pointer',
+              }}
+            >
+              <span
+                style={{
+                  display: 'grid',
+                  gap: '4px',
+                }}
+              >
+                <span style={{ width: '18px', height: '2px', background: colors.light, borderRadius: '2px' }} />
+                <span style={{ width: '18px', height: '2px', background: colors.light, borderRadius: '2px' }} />
+                <span style={{ width: '18px', height: '2px', background: colors.light, borderRadius: '2px' }} />
+              </span>
+            </button>
+          ) : (
+            <nav role="navigation" aria-label="Main navigation" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {navItems.map((section) => {
+                const isActive = activeSection === section.id
+
+                return (
+                  <a
+                    key={section.id}
+                    href={`#${section.id}`}
+                    onClick={navigateToSection(section.id)}
+                    style={{
+                      ...navLink,
+                      ...(isActive ? navLinkActive : null),
+                    }}
+                  >
+                    {section.label}
+                  </a>
+                )
+              })}
+            </nav>
+          )}
+          {isMobile && mobileMenuOpen ? (
+            <nav
+              role="navigation"
+              aria-label="Mobile navigation"
+              style={{
+                position: 'absolute',
+                top: '68px',
+                right: '0',
+                display: 'grid',
+                gap: '8px',
+                padding: '14px',
+                minWidth: '220px',
+                background: 'rgba(25,25,29,0.98)',
+                border: `1px solid ${colors.border}`,
+                borderRadius: '18px',
+                boxShadow: `0 24px 60px rgba(0,0,0,0.35)`,
+              }}
+            >
+              {navItems.map((section) => {
+                const isActive = activeSection === section.id
+
+                return (
+                  <a
+                    key={section.id}
+                    href={`#${section.id}`}
+                    onClick={navigateToSection(section.id)}
+                    style={{
+                      ...navLink,
+                      display: 'block',
+                      ...(isActive ? navLinkActive : null),
+                    }}
+                  >
+                    {section.label}
+                  </a>
+                )
+              })}
+            </nav>
+          ) : null}
+        </div>
+      </header>
+
+      <main style={{ paddingTop: '94px', position: 'relative', zIndex: 2 }} role="main" aria-label="Primary content">
+        <a
+          href="#home"
+          style={{
+            position: 'absolute',
+            top: '-40px',
+            left: '0',
+            background: colors.accent,
+            color: colors.background,
+            padding: '8px 16px',
+            borderRadius: '6px',
+            textDecoration: 'none',
+            fontWeight: 600,
+            fontSize: '14px',
+            zIndex: 1000,
+          }}
+          onFocus={(e) => {
+            e.target.style.top = '16px'
+          }}
+          onBlur={(e) => {
+            e.target.style.top = '-40px'
+          }}
+        >
+          Skip to main content
+        </a>
+        <section id="home" style={{ padding: '96px 0 72px', scrollMarginTop: '120px' }}>
+          <div style={shell}>
+            <div
+              style={{
+                ...cardBase,
+                padding: isMobile ? '30px 22px' : '44px',
+                background:
+                  'radial-gradient(circle at top left, rgba(232,98,44,0.22), transparent 38%), linear-gradient(180deg, #19191d 0%, #17171b 100%)',
+              }}
+            >
+              <div
+                style={{
+                  width: '148px',
+                  height: '148px',
+                  padding: '3px',
+                  borderRadius: '50%',
+                  background: `linear-gradient(145deg, ${colors.accent}, ${colors.accentDark}, ${colors.accentLight})`,
+                  animation: 'profilePulse 2.8s ease-in-out infinite',
+                  margin: '0 auto',
+                }}
+              >
+                <img
+                  src="https://res.cloudinary.com/dzwfwyikt/image/upload/v1777175493/real_image_copy_wy1pqi.png"
+                  alt="Muhammad Hassan Idrees, AI Automation Engineer and SaaS Builder"
+                  loading="lazy"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    borderRadius: '50%',
+                    display: 'block',
+                    background: '#0f0f11',
+                  }}
+                />
+              </div>
+              <div
+                style={{
+                  marginTop: '20px',
+                  display: 'flex',
+                  justifyContent: 'center',
+                }}
+              >
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    borderRadius: '999px',
+                    border: `1px solid ${colors.border}`,
+                    background: 'rgba(255,255,255,0.03)',
+                    color: colors.light,
+                    padding: '9px 14px',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                  }}
+                >
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      background: '#4cd16f',
+                      animation: 'dotPulse 1.8s ease-in-out infinite',
+                    }}
+                  />
+                  Available for projects
+                </span>
+              </div>
+              <p
+                style={{
+                  margin: '22px 0 0',
+                  color: colors.muted,
+                  textAlign: 'center',
+                  fontSize: isMobile ? '16px' : '18px',
+                }}
+              >
+                Hi, I&apos;m{' '}
+                <span style={{ color: colors.accent, fontWeight: 700 }}>
+                  Muhammad Hassan Idrees
+                </span>
+              </p>
+              <h1
+                style={{
+                  margin: '14px auto 0',
+                  maxWidth: '15ch',
+                  textAlign: 'center',
+                  fontSize: 'clamp(38px, 6.5vw, 76px)',
+                  fontWeight: 900,
+                  lineHeight: 1.02,
+                  letterSpacing: '-0.04em',
+                  backgroundImage: `linear-gradient(100deg, ${colors.light}, ${colors.accent}, ${colors.light})`,
+                  backgroundSize: '220% 220%',
+                  backgroundPosition: '0% 50%',
+                  WebkitBackgroundClip: 'text',
+                  backgroundClip: 'text',
+                  color: 'transparent',
+                  animation: 'gradientShift 6s linear infinite',
+                }}
+              >
+                AI Automation Engineer &amp; SaaS Builder
+              </h1>
+              <p
+                style={{
+                  maxWidth: '70ch',
+                  fontSize: isMobile ? '1rem' : '1.1rem',
+                  lineHeight: 1.85,
+                  color: colors.text,
+                  textAlign: 'center',
+                  margin: '22px auto 0',
+                }}
+              >
+                Building MVPs, SaaS Platforms &amp; AI-Powered Automations. I help startups &amp; businesses go from idea to production — fast.
+              </p>
+              <div
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '12px',
+                  justifyContent: 'center',
+                  marginTop: '28px',
+                }}
+              >
+                <a
+                  href="#contact"
+                  onClick={navigateToSection('contact')}
+                  style={{
+                    background: `linear-gradient(120deg, ${colors.accent}, ${colors.accentLight})`,
+                    color: colors.light,
+                    padding: '14px 24px',
+                    borderRadius: '999px',
+                    textDecoration: 'none',
+                    fontWeight: 700,
+                    boxShadow: `0 16px 34px ${colors.accentGlow}`,
+                  }}
+                >
+                  Let&apos;s Work Together →
+                </a>
+                <a
+                  href="#projects"
+                  onClick={navigateToSection('projects')}
+                  style={{
+                    color: colors.light,
+                    textDecoration: 'none',
+                    padding: '14px 24px',
+                    borderRadius: '999px',
+                    border: `1px solid ${colors.border}`,
+                    background: 'transparent',
+                  }}
+                >
+                  View Projects
+                </a>
+              </div>
+              <div
+                style={{
+                  marginTop: '34px',
+                  paddingTop: '24px',
+                  borderTop: `1px solid ${colors.border}`,
+                  display: 'grid',
+                  gap: '18px',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
+                }}
+              >
+                {[
+                  { value: '4+', label: 'Years Experience' },
+                  { value: '50+', label: 'Projects Delivered' },
+                  { value: '100%', label: 'Client Satisfaction' },
+                ].map((item) => (
+                  <div key={item.label} style={{ textAlign: 'center' }}>
+                    <p
+                      style={{
+                        margin: 0,
+                        color: colors.accent,
+                        fontWeight: 900,
+                        fontSize: '1.6rem',
+                      }}
+                    >
+                      {item.value}
+                    </p>
+                    <p
+                      style={{
+                        margin: '6px 0 0',
+                        color: colors.muted,
+                        fontSize: '10px',
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        letterSpacing: '1.3px',
+                      }}
+                    >
+                      {item.label}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="about"
+          data-reveal-id="about"
+          style={{ ...sectionStyle, scrollMarginTop: '120px', ...getRevealStyle('about') }}
+        >
+          <div style={shell}>
+            <div
+              style={{
+                ...cardBase,
+                padding: isMobile ? '28px 22px' : '38px 40px',
+                background:
+                  'radial-gradient(circle at top right, rgba(232,98,44,0.12), transparent 42%), linear-gradient(180deg, #19191d 0%, #17171b 100%)',
+              }}
+            >
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  marginBottom: '20px',
+                }}
+              >
+                <span
+                  aria-hidden="true"
+                  style={{
+                    width: '36px',
+                    height: '2px',
+                    borderRadius: '999px',
+                    background: colors.accent,
+                  }}
+                />
+                <span
+                  style={{
+                    color: colors.accent,
+                    textTransform: 'uppercase',
+                    letterSpacing: '4px',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                  }}
+                >
+                  ABOUT ME
+                </span>
+              </div>
+              <h2
+                style={{
+                  ...heading,
+                  fontSize: isMobile ? '1.95rem' : 'clamp(2.3rem, 4.2vw, 3.2rem)',
+                  lineHeight: 1.15,
+                  marginBottom: '18px',
+                }}
+              >
+                Turning ideas into{' '}
+                <span
+                  style={{
+                    backgroundImage: `linear-gradient(90deg, ${colors.accent}, ${colors.accentLight})`,
+                    WebkitBackgroundClip: 'text',
+                    backgroundClip: 'text',
+                    color: 'transparent',
+                  }}
+                >
+                  production-ready
+                </span>{' '}
+                products
+              </h2>
+              <p
+                style={{
+                  margin: 0,
+                  maxWidth: '92ch',
+                  color: colors.text,
+                  lineHeight: 1.85,
+                  fontSize: isMobile ? '1rem' : '1.08rem',
+                }}
+              >
+                With 4+ years of hands-on experience, I help startups, agencies, and businesses go from idea to a fully functional, production-ready product — fast. I build scalable apps, SaaS platforms, internal tools, AI-powered dashboards, and intelligent automation workflows — without the overhead of traditional development.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="services"
+          data-reveal-id="services"
+          style={{ ...sectionStyle, scrollMarginTop: '120px', ...getRevealStyle('services') }}
+        >
+          <div style={shell}>
+            <div style={sectionLabel}>Services</div>
+            <div
+              style={{
+                display: 'grid',
+                gap: '20px',
+                gridTemplateColumns: isMobile ? '1fr' : isTablet ? 'repeat(2, minmax(0, 1fr))' : 'repeat(3, minmax(0, 1fr))',
+              }}
+            >
+              {services.map((service) => {
+                const isServiceHovered = hoveredService === service.title
+
+                return (
+                  <article
+                    key={service.title}
+                    onMouseEnter={() => !isTouch && setHoveredService(service.title)}
+                    onMouseLeave={() => !isTouch && setHoveredService(null)}
+                    style={{
+                      background: isServiceHovered ? colors.cardHover : '#19191d',
+                      border: `1px solid ${isServiceHovered ? colors.accentGlow : colors.border}`,
+                      borderRadius: '14px',
+                      padding: isMobile ? '24px' : isTablet ? '28px' : '36px',
+                      transform: isServiceHovered && !isTouch ? 'translateY(-8px)' : 'translateY(0)',
+                      boxShadow: isServiceHovered && !isTouch
+                        ? `0 0 0 1px ${colors.accentGlow}, 0 22px 44px rgba(0,0,0,0.34)`
+                        : '0 12px 30px rgba(0,0,0,0.2)',
+                      transition:
+                        'transform 280ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1), border-color 280ms cubic-bezier(0.22, 1, 0.36, 1), background 280ms cubic-bezier(0.22, 1, 0.36, 1)',
+                    }}
+                  >
+                    <h3 style={{ margin: '0 0 12px', color: colors.light, fontSize: 'clamp(1rem, 2.5vw, 1.18rem)' }}>
+                      {service.title}
+                    </h3>
+                    <p style={{ margin: 0, lineHeight: 1.75, color: colors.text }}>
+                      {service.text}
+                    </p>
+                  </article>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="stack"
+          data-reveal-id="stack"
+          style={{ ...sectionStyle, scrollMarginTop: '120px', ...getRevealStyle('stack') }}
+        >
+          <div style={shell}>
+            <div style={sectionLabel}>Tech Stack</div>
+            <div
+              style={{
+                display: 'grid',
+                gap: '20px',
+                gridTemplateColumns: isMobile ? '1fr' : isTablet ? 'repeat(2, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))',
+              }}
+            >
+              {techStackCategories.map((group) => (
+                <article
+                  key={group.category}
+                  style={{
+                    ...cardBase,
+                    borderRadius: '14px',
+                    padding: isMobile ? '20px' : '24px',
+                  }}
+                >
+                  <p
+                    style={{
+                      margin: '0 0 14px',
+                      color: colors.muted,
+                      textTransform: 'uppercase',
+                      fontSize: 'clamp(0.8rem, 1.5vw, 0.85rem)',
+                      letterSpacing: '3px',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {group.category}
+                  </p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                    {group.tools.map((tool) => {
+                      const toolKey = `${group.category}-${tool}`
+                      const isToolHovered = hoveredTool === toolKey
+
+                      return (
+                        <span
+                          key={tool}
+                          onMouseEnter={() => !isTouch && setHoveredTool(toolKey)}
+                          onMouseLeave={() => !isTouch && setHoveredTool('')}
+                          style={{
+                            borderRadius: '999px',
+                            border: `1px solid ${isToolHovered && !isTouch ? colors.accent : colors.border}`,
+                            background: colors.card,
+                            color: isToolHovered && !isTouch ? colors.accent : colors.light,
+                            padding: '10px 14px',
+                            fontFamily: 'JetBrains Mono, monospace',
+                            fontSize: 'clamp(0.78rem, 1.2vw, 0.84rem)',
+                            lineHeight: 1.2,
+                            transform: isToolHovered && !isTouch ? 'translateY(-3px)' : 'translateY(0)',
+                            boxShadow: isToolHovered && !isTouch ? `0 8px 18px ${colors.accentGlow}` : 'none',
+                            transition:
+                              'transform 220ms cubic-bezier(0.22, 1, 0.36, 1), border-color 220ms cubic-bezier(0.22, 1, 0.36, 1), color 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1)',
+                          }}
+                        >
+                          {tool}
+                        </span>
+                      )
+                    })}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="projects"
+          data-reveal-id="projects"
+          style={{ ...sectionStyle, scrollMarginTop: '120px', ...getRevealStyle('projects') }}
+        >
+          <div style={shell}>
+            <div style={sectionLabel}>Projects</div>
+            <div
+              style={{
+                display: 'grid',
+                gap: '24px',
+                gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, minmax(0, 1fr))',
+              }}
+            >
+              {projects.map((project) => {
+                const isHovered = hoveredCard === project.name
+
+                return (
+                  <article
+                    key={project.name}
+                    onMouseEnter={() => !isTouch && setHoveredCard(project.name)}
+                    onMouseLeave={() => !isTouch && setHoveredCard(null)}
+                    style={{
+                      ...cardBase,
+                      padding: 0,
+                      overflow: 'hidden',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      transform: isHovered && !isTouch ? 'translateY(-8px)' : 'translateY(0)',
+                      boxShadow: isHovered && !isTouch
+                        ? `0 0 0 1px ${colors.accentGlow}, 0 24px 50px rgba(0,0,0,0.35)`
+                        : `0 0 0 1px ${colors.accentGlow}, 0 12px 30px rgba(0,0,0,0.2)`,
+                      transition: 'transform 280ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1)',
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: 'relative',
+                        width: '100%',
+                        height: isMobile ? '140px' : '170px',
+                        background: `linear-gradient(135deg, ${colors.accent}22, ${colors.accentDark}44, ${colors.accent}22)`,
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <div
+                        aria-hidden="true"
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          width: '30%',
+                          height: '100%',
+                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)',
+                          animation: 'shineSwipe 3s ease-in-out infinite',
+                        }}
+                      />
+                    </div>
+                    <div style={{ padding: '20px 24px' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: '8px',
+                          marginBottom: '10px',
+                        }}
+                      >
+                        {project.categories.map((cat) => (
+                          <span
+                            key={cat}
+                            style={{
+                              fontFamily: 'JetBrains Mono, monospace',
+                              fontSize: '0.7rem',
+                              fontWeight: 700,
+                              letterSpacing: '0.08em',
+                              textTransform: 'uppercase',
+                              color: colors.accent,
+                            }}
+                          >
+                            {cat}
+                          </span>
+                        ))}
+                      </div>
+                      <h3 style={{ margin: '0 0 8px', color: colors.light, fontSize: '1.24rem', fontWeight: 700 }}>
+                        {project.name}
+                      </h3>
+                      <p style={{ margin: '0 0 14px', lineHeight: 1.75, color: colors.text, fontSize: '0.95rem' }}>
+                        {project.summary}
+                      </p>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                        {project.tech.map((toolTag) => (
+                          <span
+                            key={toolTag}
+                            style={{
+                              borderRadius: '999px',
+                              border: `1px solid ${colors.accent}`,
+                              background: 'transparent',
+                              color: colors.accent,
+                              padding: '6px 12px',
+                              fontFamily: 'JetBrains Mono, monospace',
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                              lineHeight: 1.2,
+                            }}
+                          >
+                            {toolTag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </article>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="reviews"
+          data-reveal-id="reviews"
+          style={{ ...sectionStyle, scrollMarginTop: '120px', ...getRevealStyle('reviews') }}
+        >
+          <div style={shell}>
+            <div style={sectionLabel}>Reviews</div>
+            <div
+              style={{
+                display: 'grid',
+                gap: '20px',
+                gridTemplateColumns: isMobile ? '1fr' : isTablet ? 'repeat(2, minmax(0, 1fr))' : 'repeat(3, minmax(0, 1fr))',
+              }}
+            >
+              {reviews.map((review) => {
+                const isReviewHovered = hoveredCard === review.person
+
+                return (
+                  <blockquote
+                    key={review.person}
+                    onMouseEnter={() => !isTouch && setHoveredCard(review.person)}
+                    onMouseLeave={() => !isTouch && setHoveredCard(null)}
+                    style={{
+                      ...cardBase,
+                      margin: 0,
+                      padding: isMobile ? '20px' : '26px',
+                      position: 'relative',
+                      border: `1px solid ${isReviewHovered && !isTouch ? colors.accent : colors.border}`,
+                      boxShadow: isReviewHovered && !isTouch
+                        ? `0 0 0 1px ${colors.accent}, 0 16px 40px ${colors.accentGlow}`
+                        : `0 0 0 1px ${colors.accentGlow}, 0 12px 30px rgba(0,0,0,0.2)`,
+                      transition: 'border-color 220ms ease, box-shadow 220ms ease',
+                    }}
+                  >
+                    <div
+                      aria-hidden="true"
+                      style={{
+                        position: 'absolute',
+                        top: '16px',
+                        right: '18px',
+                        fontSize: '3.6rem',
+                        color: `${colors.accent}22`,
+                        lineHeight: 1,
+                        fontFamily: 'Georgia, serif',
+                      }}
+                    >
+                      "
+                    </div>
+                    <div style={{ display: 'flex', gap: '4px', marginBottom: '14px' }}>
+                      {Array.from({ length: review.rating }).map((_, idx) => (
+                        <svg
+                          key={idx}
+                          width="16"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          style={{ color: colors.accent }}
+                        >
+                          <path
+                            d="M8 1.5L10.5 6H15.5L11.75 9.5L13.25 14.5L8 11L2.75 14.5L4.25 9.5L0.5 6H5.5L8 1.5Z"
+                            fill="currentColor"
+                          />
+                        </svg>
+                      ))}
+                    </div>
+                    <p
+                      style={{
+                        margin: '0 0 18px',
+                        fontSize: '1.02rem',
+                        lineHeight: 1.75,
+                        color: colors.light,
+                        fontStyle: 'italic',
+                        fontWeight: 500,
+                      }}
+                    >
+                      {review.quote}
+                    </p>
+                    <div
+                      style={{
+                        height: '1px',
+                        background: colors.border,
+                        margin: '16px 0',
+                      }}
+                    />
+                    <footer style={{ color: colors.muted }}>
+                      <strong style={{ color: colors.light, fontWeight: 700 }}>{review.person}</strong>
+                      <p
+                        style={{
+                          margin: '4px 0 0',
+                          fontSize: '0.85rem',
+                          color: colors.muted,
+                        }}
+                      >
+                        {review.role}
+                      </p>
+                    </footer>
+                  </blockquote>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+
+                <section
+          id="contact"
+          data-reveal-id="contact"
+          style={{ ...sectionStyle, scrollMarginTop: '120px', ...getRevealStyle('contact'), display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <div
+            style={{
+              width: '100%',
+              maxWidth: isMobile ? '100%' : '600px',
+              margin: '0 auto',
+              padding: isMobile ? '0 16px' : '0',
+              position: 'relative',
+            }}
+          >
+            <div
+              style={{
+                position: 'relative',
+                padding: 'clamp(28px, 5vw, 40px) clamp(20px, 4vw, 32px)',
+                borderRadius: '24px',
+                border: `2px solid ${ colors.accent }`,
+                background: `linear-gradient(135deg, rgba(255, 153, 0, 0.05) 0%, rgba(255, 153, 0, 0.02) 100%)`,
+                textAlign: 'center',
+              }}
+            >
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: '24px',
+                  right: '24px',
+                  height: '2px',
+                  background: `linear-gradient(90deg, transparent, ${ colors.accent }, transparent)`,
+                  borderRadius: '24px 24px 0 0',
+                }}
+              />
+
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '-60px',
+                  right: '-60px',
+                  width: '200px',
+                  height: '200px',
+                  background: `radial-gradient(circle, ${ colors.accentGlow } 0%, transparent 70%)`,
+                  borderRadius: '50%',
+                  pointerEvents: 'none',
+                  zIndex: -1,
+                }}
+              />
+
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <h2
+                  style={{
+                    margin: '0 0 16px',
+                    fontSize: 'clamp(1.6rem, 5vw, 2.1rem)',
+                    lineHeight: 1.3,
+                    fontWeight: 700,
+                    color: colors.light,
+                  }}
+                >
+                  Let's Build Something{' '}
+                  <span
+                    style={{
+                      background: `linear-gradient(135deg, ${ colors.accent } 0%, #ff8533 100%)`,
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                    }}
+                  >
+                    Powerful
+                  </span>
+                </h2>
+
+                <p
+                  style={{
+                    margin: '0 0 28px',
+                    fontSize: 'clamp(0.9rem, 2vw, 0.95rem)',
+                    lineHeight: 1.8,
+                    color: colors.light,
+                    opacity: 0.85,
+                  }}
+                >
+                  Whether you're a founder validating an idea, an agency needing a white-label solution, or a business ready to automate � let's talk.
+                </p>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '12px',
+                    flexWrap: 'wrap',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <a
+                    href="mailto:your@email.com"
+                    style={{
+                      padding: 'clamp(10px, 2vw, 12px) clamp(18px, 3vw, 24px)',
+                      borderRadius: '999px',
+                      textDecoration: 'none',
+                      fontWeight: 700,
+                      fontSize: 'clamp(0.9rem, 1.5vw, 0.95rem)',
+                      background: colors.accent,
+                      color: colors.dark,
+                      border: `2px solid ${ colors.accent }`,
+                      transition: 'all 200ms ease',
+                      cursor: 'pointer',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isTouch) {
+                        e.target.style.background = 'transparent'
+                        e.target.style.color = colors.accent
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isTouch) {
+                        e.target.style.background = colors.accent
+                        e.target.style.color = colors.dark
+                      }
+                    }}
+                  >
+                    Send a Message
+                  </a>
+
+                  <a
+                    href="https://linkedin.com/in/yourprofile"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      padding: 'clamp(10px, 2vw, 12px) clamp(18px, 3vw, 24px)',
+                      borderRadius: '999px',
+                      textDecoration: 'none',
+                      fontWeight: 700,
+                      fontSize: 'clamp(0.9rem, 1.5vw, 0.95rem)',
+                      background: 'transparent',
+                      color: colors.light,
+                      border: `2px solid ${ colors.border }`,
+                      transition: 'all 200ms ease',
+                      cursor: 'pointer',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isTouch) {
+                        e.target.style.borderColor = colors.accent
+                        e.target.style.color = colors.accent
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isTouch) {
+                        e.target.style.borderColor = colors.border
+                        e.target.style.color = colors.light
+                      }
+                    }}
+                  >
+                    LinkedIn
+                  </a>
+
+                  <a
+                    href="https://upwork.com/yourprofile"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      padding: 'clamp(10px, 2vw, 12px) clamp(18px, 3vw, 24px)',
+                      borderRadius: '999px',
+                      textDecoration: 'none',
+                      fontWeight: 700,
+                      fontSize: 'clamp(0.9rem, 1.5vw, 0.95rem)',
+                      background: 'transparent',
+                      color: colors.light,
+                      border: `2px solid ${ colors.border }`,
+                      transition: 'all 200ms ease',
+                      cursor: 'pointer',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isTouch) {
+                        e.target.style.borderColor = colors.accent
+                        e.target.style.color = colors.accent
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isTouch) {
+                        e.target.style.borderColor = colors.border
+                        e.target.style.color = colors.light
+                      }
+                    }}
+                  >
+                    Upwork
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer
+        data-reveal-id="footer"
+        style={{
+          ...getRevealStyle('footer'),
+          position: 'relative',
+          zIndex: 2,
+          borderTop: `1px solid ${colors.border}`,
+          padding: '40px 0 48px',
+          textAlign: 'center',
+        }}
+      >
+        <div style={shell}>
+          <p
+            style={{
+              margin: 0,
+              fontSize: '0.82rem',
+              color: colors.muted,
+              opacity: 0.7,
+              letterSpacing: '0.5px',
+            }}
+          >
+            © 2026 Muhammad Hassan Idrees. Built to perform.
+          </p>
+        </div>
+      </footer>
+    </div>
+  )
+}
+
+export default App
+
