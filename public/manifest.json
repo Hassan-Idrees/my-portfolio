@@ -8,12 +8,12 @@
   "theme_color": "#e8622c",
   "icons": [
     {
-      "src": "https://res.cloudinary.com/dzwfwyikt/image/upload/v1777175493/real_image_copy_wy1pqi.png",
+      "src": "/favicon/favicon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://res.cloudinary.com/dzwfwyikt/image/upload/v1777175493/real_image_copy_wy1pqi.png",
+      "src": "/favicon/favicon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
