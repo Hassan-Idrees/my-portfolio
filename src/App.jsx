@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 
 const colors = {
   background: '#111113',
@@ -131,11 +131,15 @@ function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [isTablet, setIsTablet] = useState(false)
+  const [isLaptop, setIsLaptop] = useState(false)
+  const [viewportWidth, setViewportWidth] = useState(1200)
   const [isTouch, setIsTouch] = useState(false)
   const [mouseGlowPosition, setMouseGlowPosition] = useState({ x: 0, y: 0 })
   const [revealedSections, setRevealedSections] = useState({})
   const [hoveredService, setHoveredService] = useState(null)
   const [hoveredTool, setHoveredTool] = useState('')
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 })
+  const navRefs = useRef({})
 
   useEffect(() => {
     document.documentElement.style.scrollBehavior = 'smooth'
@@ -145,8 +149,10 @@ function App() {
     const updateState = () => {
       setScrolled(window.scrollY > 8)
       const width = window.innerWidth
+      setViewportWidth(width)
       setIsMobile(width < 768)
       setIsTablet(width >= 768 && width < 1024)
+      setIsLaptop(width >= 1024 && width < 1200)
 
       const probe = window.scrollY + window.innerHeight * 0.35
       let current = 'home'
@@ -243,13 +249,32 @@ function App() {
     return () => observer.disconnect()
   }, [])
 
+  useEffect(() => {
+    const updateIndicatorPosition = () => {
+      const activeButton = navRefs.current[activeSection]
+      if (activeButton && !isMobile) {
+        const { offsetLeft, offsetWidth } = activeButton
+        setIndicatorStyle({
+          left: offsetLeft,
+          width: offsetWidth,
+        })
+      }
+    }
+
+    updateIndicatorPosition()
+    window.addEventListener('resize', updateIndicatorPosition)
+    return () => window.removeEventListener('resize', updateIndicatorPosition)
+  }, [activeSection, isMobile])
+
   const page = {
+    width: '100%',
     minHeight: '100vh',
     background: colors.background,
     color: colors.text,
     fontFamily: 'Inter, sans-serif',
     position: 'relative',
-    overflowX: 'hidden',
+    margin: 0,
+    padding: 0,
   }
 
   const shell = {
@@ -294,14 +319,15 @@ function App() {
     letterSpacing: '0.4px',
     textTransform: 'uppercase',
     padding: '10px 12px',
-    borderRadius: '999px',
-    border: `1px solid transparent`,
+    borderRadius: '8px',
+    border: 'none',
+    position: 'relative',
+    zIndex: 1,
+    transition: 'background 0.25s ease',
   }
 
   const navLinkActive = {
-    background: 'rgba(232,98,44,0.08)',
-    borderColor: colors.accent,
-    color: colors.light,
+    color: '#ffffff',
   }
 
   const navigateToSection = (sectionId) => (event) => {
@@ -388,6 +414,11 @@ function App() {
             background: rgba(232, 98, 44, 0.4);
             color: #f0ede8;
           }
+
+          nav a:not(:where([style*="#ffffff"])):hover {
+            background: rgba(255,255,255,0.05) !important;
+            transition: background 0.25s ease;
+          }
         `}
       </style>
       <div
@@ -401,22 +432,10 @@ function App() {
           transition: 'background 80ms linear',
         }}
       />
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'fixed',
-          left: 0,
-          right: 0,
-          top: 0,
-          height: '3px',
-          zIndex: 40,
-          background: `linear-gradient(90deg, ${colors.accent}, ${colors.accentLight})`,
-        }}
-      />
       <header
         style={{
           position: 'fixed',
-          top: '3px',
+          top: '0',
           left: 0,
           right: 0,
           zIndex: 20,
@@ -486,13 +505,33 @@ function App() {
               </span>
             </button>
           ) : (
-            <nav role="navigation" aria-label="Main navigation" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            <nav role="navigation" aria-label="Main navigation" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', position: 'relative' }}>
+              <div
+                aria-hidden="true"
+                style={{
+                  position: 'absolute',
+                  left: indicatorStyle.left,
+                  top: 0,
+                  width: indicatorStyle.width,
+                  height: '100%',
+                  background: 'linear-gradient(135deg, #e8622c, #c44d1a)',
+                  borderRadius: '8px',
+                  boxShadow: '0 2px 12px rgba(232,98,44,0.3)',
+                  transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                  pointerEvents: 'none',
+                }}
+              />
               {navItems.map((section) => {
                 const isActive = activeSection === section.id
 
                 return (
                   <a
                     key={section.id}
+                    ref={(el) => {
+                      if (el) {
+                        navRefs.current[section.id] = el
+                      }
+                    }}
                     href={`#${section.id}`}
                     onClick={navigateToSection(section.id)}
                     style={{
@@ -547,7 +586,7 @@ function App() {
         </div>
       </header>
 
-      <main style={{ paddingTop: '94px', position: 'relative', zIndex: 2 }} role="main" aria-label="Primary content">
+      <main style={{ paddingTop: '70px', position: 'relative', zIndex: 2 }} role="main" aria-label="Primary content">
         <a
           href="#home"
           style={{
@@ -572,199 +611,222 @@ function App() {
         >
           Skip to main content
         </a>
-        <section id="home" style={{ padding: '96px 0 72px', scrollMarginTop: '120px' }}>
-          <div style={shell}>
+        <section id="home" style={{ minHeight: 'auto', padding: isMobile ? '100px 24px 40px' : '120px 24px 60px', scrollMarginTop: '90px' }}>
+          <div style={{ maxWidth: '1200px', width: '100%', margin: '0 auto' }}>
             <div
               style={{
-                ...cardBase,
-                padding: isMobile ? '30px 22px' : '44px',
-                background:
-                  'radial-gradient(circle at top left, rgba(232,98,44,0.22), transparent 38%), linear-gradient(180deg, #19191d 0%, #17171b 100%)',
+                display: 'flex',
+                flexDirection: isMobile ? 'column-reverse' : 'row',
+                alignItems: 'center',
+                gap: isMobile ? '32px' : isTablet ? '30px' : '40px',
               }}
             >
               <div
                 style={{
-                  width: '148px',
-                  height: '148px',
-                  padding: '3px',
-                  borderRadius: '50%',
-                  background: `linear-gradient(145deg, ${colors.accent}, ${colors.accentDark}, ${colors.accentLight})`,
-                  animation: 'profilePulse 2.8s ease-in-out infinite',
-                  margin: '0 auto',
+                  width: isMobile ? '100%' : '55%',
+                  textAlign: isMobile ? 'center' : 'left',
                 }}
               >
-                <img
-                  src="https://res.cloudinary.com/dzwfwyikt/image/upload/v1777175493/real_image_copy_wy1pqi.png"
-                  alt="Muhammad Hassan Idrees, AI Automation Engineer and SaaS Builder"
-                  loading="lazy"
+                <div style={{ display: 'flex', justifyContent: isMobile ? 'center' : 'flex-start', marginBottom: '20px' }}>
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      borderRadius: '999px',
+                      border: `1px solid ${colors.border}`,
+                      background: 'rgba(255,255,255,0.03)',
+                      color: colors.light,
+                      padding: '9px 14px',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                    }}
+                  >
+                    <span
+                      aria-hidden="true"
+                      style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        background: '#4cd16f',
+                        animation: 'dotPulse 1.8s ease-in-out infinite',
+                      }}
+                    />
+                    Available for projects
+                  </span>
+                </div>
+
+                <p
+                  style={{
+                    margin: '0 0 10px',
+                    color: colors.muted,
+                    fontSize: 'clamp(13px, 1.2vw, 15px)',
+                  }}
+                >
+                  Hi, I&apos;m{' '}
+                  <span style={{ color: colors.accent, fontWeight: 700 }}>
+                    Muhammad Hassan Idrees
+                  </span>
+                </p>
+
+                <h1
+                  style={{
+                    margin: '0 0 16px',
+                    fontSize: 'clamp(30px, 4vw, 58px)',
+                    fontWeight: 900,
+                    lineHeight: isTablet ? 1.06 : 1.04,
+                    letterSpacing: '-2px',
+                    backgroundImage: `linear-gradient(100deg, ${colors.light}, ${colors.accent}, ${colors.light})`,
+                    backgroundSize: '220% 220%',
+                    backgroundPosition: '0% 50%',
+                    WebkitBackgroundClip: 'text',
+                    backgroundClip: 'text',
+                    color: 'transparent',
+                    animation: 'gradientShift 6s linear infinite',
+                  }}
+                >
+                  AI Automation Engineer &amp; SaaS Builder
+                </h1>
+
+                <p
+                  style={{
+                    maxWidth: isMobile ? '100%' : '480px',
+                    fontSize: 'clamp(14px, 1.5vw, 17px)',
+                    lineHeight: 1.7,
+                    color: colors.muted,
+                    margin: '0 0 28px',
+                  }}
+                >
+                  Building MVPs, SaaS Platforms &amp; AI-Powered Automations. I help startups &amp; businesses go from idea to production — fast.
+                </p>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: isMobile ? 'column' : 'row',
+                    gap: '12px',
+                    justifyContent: isMobile ? 'center' : 'flex-start',
+                    marginBottom: '36px',
+                    width: isMobile ? '100%' : 'auto',
+                  }}
+                >
+                  <a
+                    href="#contact"
+                    onClick={navigateToSection('contact')}
+                    style={{
+                      background: `linear-gradient(120deg, ${colors.accent}, ${colors.accentLight})`,
+                      color: colors.light,
+                      padding: isMobile ? '14px 28px' : (isTablet || isLaptop) ? '14px 32px' : '17px 42px',
+                      fontSize: isMobile ? '13px' : (isTablet || isLaptop) ? '13px' : '14px',
+                      borderRadius: '999px',
+                      textDecoration: 'none',
+                      fontWeight: 700,
+                      boxShadow: `0 16px 34px ${colors.accentGlow}`,
+                      width: isMobile ? '100%' : 'auto',
+                      textAlign: 'center',
+                      boxSizing: 'border-box',
+                    }}
+                  >
+                    Let&apos;s Work Together →
+                  </a>
+                  <a
+                    href="#projects"
+                    onClick={navigateToSection('projects')}
+                    style={{
+                      color: colors.light,
+                      textDecoration: 'none',
+                      padding: isMobile ? '14px 28px' : (isTablet || isLaptop) ? '14px 32px' : '17px 42px',
+                      fontSize: isMobile ? '13px' : (isTablet || isLaptop) ? '13px' : '14px',
+                      borderRadius: '999px',
+                      border: `1px solid ${colors.border}`,
+                      background: 'transparent',
+                      width: isMobile ? '100%' : 'auto',
+                      textAlign: 'center',
+                      boxSizing: 'border-box',
+                    }}
+                  >
+                    View Projects
+                  </a>
+                </div>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: 'clamp(24px, 4vw, 56px)',
+                    flexWrap: 'wrap',
+                    justifyContent: isMobile ? 'center' : 'flex-start',
+                  }}
+                >
+                  {[
+                    { value: '4+', label: 'Years Experience' },
+                    { value: '50+', label: 'Projects Delivered' },
+                    { value: '100%', label: 'Client Satisfaction' },
+                  ].map((item) => (
+                    <div key={item.label} style={{ textAlign: isMobile ? 'center' : 'left' }}>
+                      <p
+                        style={{
+                          margin: 0,
+                          color: colors.accent,
+                          fontWeight: 900,
+                          fontSize: 'clamp(24px, 3vw, 40px)',
+                          lineHeight: 1,
+                        }}
+                      >
+                        {item.value}
+                      </p>
+                      <p
+                        style={{
+                          margin: '8px 0 0',
+                          color: colors.muted,
+                          fontSize: 'clamp(8px, 0.8vw, 10px)',
+                          fontWeight: 600,
+                          textTransform: 'uppercase',
+                          letterSpacing: '1.3px',
+                        }}
+                      >
+                        {item.label}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  width: isMobile ? '100%' : '45%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                }}
+              >
+                <div
                   style={{
                     width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    borderRadius: '50%',
-                    display: 'block',
-                    background: '#0f0f11',
-                  }}
-                />
-              </div>
-              <div
-                style={{
-                  marginTop: '20px',
-                  display: 'flex',
-                  justifyContent: 'center',
-                }}
-              >
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    borderRadius: '999px',
-                    border: `1px solid ${colors.border}`,
-                    background: 'rgba(255,255,255,0.03)',
-                    color: colors.light,
-                    padding: '9px 14px',
-                    fontSize: '13px',
-                    fontWeight: 600,
+                    maxWidth: isMobile
+                      ? '220px'
+                      : isTablet
+                        ? '300px'
+                        : isLaptop
+                          ? '350px'
+                          : viewportWidth >= 1400
+                            ? '480px'
+                            : '420px',
+                    margin: isMobile ? '0 auto' : 0,
                   }}
                 >
-                  <span
-                    aria-hidden="true"
+                  <img
+                    src="https://res.cloudinary.com/dd9zq4nvl/image/upload/v1777256507/real_image-removebg-preview_kbmmxu.png"
+                    alt="Muhammad Hassan Idrees, AI Automation Engineer and SaaS Builder"
+                    loading="lazy"
                     style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                      background: '#4cd16f',
-                      animation: 'dotPulse 1.8s ease-in-out infinite',
+                      width: '100%',
+                      height: 'auto',
+                      maxHeight: '85vh',
+                      objectFit: 'contain',
+                      objectPosition: 'center bottom',
+                      display: 'block',
                     }}
                   />
-                  Available for projects
-                </span>
-              </div>
-              <p
-                style={{
-                  margin: '22px 0 0',
-                  color: colors.muted,
-                  textAlign: 'center',
-                  fontSize: isMobile ? '16px' : '18px',
-                }}
-              >
-                Hi, I&apos;m{' '}
-                <span style={{ color: colors.accent, fontWeight: 700 }}>
-                  Muhammad Hassan Idrees
-                </span>
-              </p>
-              <h1
-                style={{
-                  margin: '14px auto 0',
-                  maxWidth: '15ch',
-                  textAlign: 'center',
-                  fontSize: 'clamp(38px, 6.5vw, 76px)',
-                  fontWeight: 900,
-                  lineHeight: 1.02,
-                  letterSpacing: '-0.04em',
-                  backgroundImage: `linear-gradient(100deg, ${colors.light}, ${colors.accent}, ${colors.light})`,
-                  backgroundSize: '220% 220%',
-                  backgroundPosition: '0% 50%',
-                  WebkitBackgroundClip: 'text',
-                  backgroundClip: 'text',
-                  color: 'transparent',
-                  animation: 'gradientShift 6s linear infinite',
-                }}
-              >
-                AI Automation Engineer &amp; SaaS Builder
-              </h1>
-              <p
-                style={{
-                  maxWidth: '70ch',
-                  fontSize: isMobile ? '1rem' : '1.1rem',
-                  lineHeight: 1.85,
-                  color: colors.text,
-                  textAlign: 'center',
-                  margin: '22px auto 0',
-                }}
-              >
-                Building MVPs, SaaS Platforms &amp; AI-Powered Automations. I help startups &amp; businesses go from idea to production — fast.
-              </p>
-              <div
-                style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: '12px',
-                  justifyContent: 'center',
-                  marginTop: '28px',
-                }}
-              >
-                <a
-                  href="#contact"
-                  onClick={navigateToSection('contact')}
-                  style={{
-                    background: `linear-gradient(120deg, ${colors.accent}, ${colors.accentLight})`,
-                    color: colors.light,
-                    padding: '14px 24px',
-                    borderRadius: '999px',
-                    textDecoration: 'none',
-                    fontWeight: 700,
-                    boxShadow: `0 16px 34px ${colors.accentGlow}`,
-                  }}
-                >
-                  Let&apos;s Work Together →
-                </a>
-                <a
-                  href="#projects"
-                  onClick={navigateToSection('projects')}
-                  style={{
-                    color: colors.light,
-                    textDecoration: 'none',
-                    padding: '14px 24px',
-                    borderRadius: '999px',
-                    border: `1px solid ${colors.border}`,
-                    background: 'transparent',
-                  }}
-                >
-                  View Projects
-                </a>
-              </div>
-              <div
-                style={{
-                  marginTop: '34px',
-                  paddingTop: '24px',
-                  borderTop: `1px solid ${colors.border}`,
-                  display: 'grid',
-                  gap: '18px',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
-                }}
-              >
-                {[
-                  { value: '4+', label: 'Years Experience' },
-                  { value: '50+', label: 'Projects Delivered' },
-                  { value: '100%', label: 'Client Satisfaction' },
-                ].map((item) => (
-                  <div key={item.label} style={{ textAlign: 'center' }}>
-                    <p
-                      style={{
-                        margin: 0,
-                        color: colors.accent,
-                        fontWeight: 900,
-                        fontSize: '1.6rem',
-                      }}
-                    >
-                      {item.value}
-                    </p>
-                    <p
-                      style={{
-                        margin: '6px 0 0',
-                        color: colors.muted,
-                        fontSize: '10px',
-                        fontWeight: 600,
-                        textTransform: 'uppercase',
-                        letterSpacing: '1.3px',
-                      }}
-                    >
-                      {item.label}
-                    </p>
-                  </div>
-                ))}
+                </div>
               </div>
             </div>
           </div>
