@@ -95,11 +95,72 @@ const techStackCategories = [
 
 const projects = [
   {
+    name: "Feury Image Group — Multi-Role Sales & Inventory Management Platform",
+    categories: ["Internal Tool", "SaaS", "B2B"],
+    summary:
+      "A custom internal business platform with role-based dashboards for sales teams, inventory managers, and admins to manage clients, product catalogs, and sales activity in one centralized system.",
+    tech: [
+      "React",
+      "TypeScript",
+      "Node.js",
+      "PostgreSQL",
+      "Tailwind CSS",
+      "shadcn/ui",
+      "Recharts",
+      "Replit",
+    ],
+    thumbnail:
+      "https://drive.google.com/thumbnail?id=1MLqCUoqzgxLQjFHu1cxNlk5U7uwQ4ZBo&sz=w1200",
+    images: [
+      "https://drive.google.com/thumbnail?id=1MLqCUoqzgxLQjFHu1cxNlk5U7uwQ4ZBo&sz=w1200",
+      "https://drive.google.com/thumbnail?id=1xpWKgQZ8iRztWMryOa57n9ntkLTiwD5i&sz=w1200",
+      "https://drive.google.com/thumbnail?id=1j3rG-YrBE4TasLPemKVfOM34vcyMB7KF&sz=w1200",
+      "https://drive.google.com/thumbnail?id=1oUzI-Div5VwXYcSqA3qi-OsWYR6RRfHK&sz=w1200",
+      "https://drive.google.com/thumbnail?id=1DeYQnyRyIA6PtSox23Jd5kLfY0Oa15xx&sz=w1200",
+      "https://drive.google.com/thumbnail?id=1xoD-F5-vh6c1XHkQSOJ9S68VyU1eMucT&sz=w1200",
+      "https://drive.google.com/thumbnail?id=1iw4EoAakQS5ccTsI6LHzfRwfp8VTgJP7&sz=w1200",
+    ],
+    problem:
+      "Promotional product companies struggle to coordinate between departments when relying on spreadsheets and disconnected tools — causing version conflicts, missing data, and inefficient processes. This platform centralizes everything into a single role-based system.",
+    features: [
+      {
+        title: "Role-Based Access Control",
+        desc: "Four distinct roles: Sales, Developer, Admin, and Inventory Manager — each with their own dashboard, navigation, and permissions.",
+      },
+      {
+        title: "Client & Product List Management",
+        desc: "Sales reps manage client accounts and build product quote lists from a live catalog of 4,800+ SKUs organized by vendor.",
+      },
+      {
+        title: "Variant-Level Pricing & GP Tracking",
+        desc: "Each product variant includes quantity, cost, quoted price, and real-time gross profit percentage for margin insights while quoting.",
+      },
+      {
+        title: "Admin Analytics Dashboard",
+        desc: "Four analytics views: sales activity overview, developer export reports, product performance trends, and a full activity timeline — with bar charts, line graphs, and pie charts.",
+      },
+      {
+        title: "Inventory Manager Panel",
+        desc: "Collapsible vendor cards, a full vendor directory with contact info, and product creation/editing workflows.",
+      },
+      {
+        title: "CSV Export & Activity Logging",
+        desc: "Developers can export product lists with full variant and pricing data. Every export is logged with user, role, date, and format for a complete audit trail.",
+      },
+    ],
+    type: "Internal Business Tool / B2B Operations Dashboard",
+  },
+  {
     name: "AI Customer Support Platform",
     categories: ["SaaS", "AI", "Automation"],
     summary:
       "Built a full-stack SaaS platform with GPT-powered chatbot, ticket management, and automated escalation workflows using n8n.",
     tech: ["Lovable.dev", "Supabase", "OpenAI", "n8n", "Stripe"],
+    thumbnail: null,
+    images: [],
+    problem: "",
+    features: [],
+    type: "SaaS",
   },
   {
     name: "Lead Generation Dashboard",
@@ -107,6 +168,11 @@ const projects = [
     summary:
       "Custom CRM dashboard with real-time analytics, lead scoring powered by AI, and automated email sequences via Make.",
     tech: ["Replit", "PostgreSQL", "Claude API", "Make"],
+    thumbnail: null,
+    images: [],
+    problem: "",
+    features: [],
+    type: "Internal Tool",
   },
   {
     name: "E-Commerce MVP",
@@ -114,6 +180,11 @@ const projects = [
     summary:
       "Launched a marketplace MVP in 5 days with Stripe payments, vendor management, and automated order notifications.",
     tech: ["Bolt.new", "Firebase", "Stripe", "Zapier"],
+    thumbnail: null,
+    images: [],
+    problem: "",
+    features: [],
+    type: "MVP",
   },
   {
     name: "Document AI Processor",
@@ -121,6 +192,11 @@ const projects = [
     summary:
       "AI-powered document processing tool with RAG system for intelligent search across company knowledge bases.",
     tech: ["Base44", "Supabase", "OpenAI", "Webhooks"],
+    thumbnail: null,
+    images: [],
+    problem: "",
+    features: [],
+    type: "AI Tool",
   },
 ];
 
@@ -163,6 +239,8 @@ function App() {
   const [hoveredService, setHoveredService] = useState(null);
   const [hoveredTool, setHoveredTool] = useState("");
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const navRefs = useRef({});
 
   useEffect(() => {
@@ -296,6 +374,25 @@ function App() {
     window.addEventListener("resize", updateIndicatorPosition);
     return () => window.removeEventListener("resize", updateIndicatorPosition);
   }, [activeSection, isMobile]);
+
+  useEffect(() => {
+    const handleEscapeKey = (event) => {
+      if (event.key === "Escape" && selectedProject) {
+        setSelectedProject(null);
+        setActiveImageIndex(0);
+      }
+    };
+
+    if (selectedProject) {
+      document.body.style.overflow = "hidden";
+      window.addEventListener("keydown", handleEscapeKey);
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [selectedProject]);
 
   const page = {
     width: "100%",
@@ -1262,6 +1359,10 @@ function App() {
                 return (
                   <article
                     key={project.name}
+                    onClick={() => {
+                      setSelectedProject(project);
+                      setActiveImageIndex(0);
+                    }}
                     onMouseEnter={() =>
                       !isTouch && setHoveredCard(project.name)
                     }
@@ -1272,6 +1373,7 @@ function App() {
                       overflow: "hidden",
                       display: "flex",
                       flexDirection: "column",
+                      cursor: "pointer",
                       transform:
                         isHovered && !isTouch
                           ? "translateY(-8px)"
@@ -1284,32 +1386,59 @@ function App() {
                         "transform 280ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1)",
                     }}
                   >
-                    <div
-                      style={{
-                        position: "relative",
-                        width: "100%",
-                        height: isMobile ? "140px" : "170px",
-                        background: `linear-gradient(135deg, ${colors.accent}22, ${colors.accentDark}44, ${colors.accent}22)`,
-                        overflow: "hidden",
-                      }}
-                    >
-                      <div
-                        aria-hidden="true"
+                    {project.thumbnail ? (
+                      <img
+                        src={project.thumbnail}
+                        alt={project.name}
                         style={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          width: "30%",
-                          height: "100%",
-                          background:
-                            "linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)",
-                          animation: "shineSwipe 3s ease-in-out infinite",
+                          width: "100%",
+                          height: isMobile ? "140px" : "170px",
+                          objectFit: "cover",
+                          borderRadius: "24px 24px 0 0",
                         }}
                       />
-                    </div>
-                    <div style={{ padding: "20px 24px" }}>
+                    ) : (
+                      <div
+                        style={{
+                          position: "relative",
+                          width: "100%",
+                          height: isMobile ? "140px" : "170px",
+                          background: `linear-gradient(135deg, ${colors.accent}22, ${colors.accentDark}44, ${colors.accent}22)`,
+                          overflow: "hidden",
+                        }}
+                      >
+                        <div
+                          aria-hidden="true"
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            width: "30%",
+                            height: "100%",
+                            background:
+                              "linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)",
+                            animation: "shineSwipe 3s ease-in-out infinite",
+                          }}
+                        />
+                      </div>
+                    )}
+                    <div style={{ padding: "20px 24px", position: "relative" }}>
+                      {isHovered && !isTouch && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "20px",
+                            right: "24px",
+                            color: colors.accent,
+                            fontSize: "0.9rem",
+                            fontWeight: 600,
+                          }}
+                        >
+                          View Details →
+                        </div>
+                      )}
                       <div
                         style={{
                           display: "flex",
@@ -1712,6 +1841,433 @@ function App() {
           </div>
         </section>
       </main>
+
+      {selectedProject && (
+        <div
+          onClick={() => {
+            setSelectedProject(null);
+            setActiveImageIndex(0);
+          }}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0, 0, 0, 0.85)",
+            backdropFilter: "blur(8px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+            padding: "20px",
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: colors.card,
+              border: `1px solid ${colors.border}`,
+              borderRadius: "24px",
+              maxWidth: "900px",
+              width: "100%",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              position: "relative",
+              animation: "modalEntrance 220ms ease-out",
+            }}
+          >
+            <style>
+              {`
+                @keyframes modalEntrance {
+                  from {
+                    transform: scale(0.95);
+                    opacity: 0;
+                  }
+                  to {
+                    transform: scale(1);
+                    opacity: 1;
+                  }
+                }
+                @keyframes imageFade {
+                  from {
+                    opacity: 0;
+                  }
+                  to {
+                    opacity: 1;
+                  }
+                }
+              `}
+            </style>
+
+            <button
+              onClick={() => {
+                setSelectedProject(null);
+                setActiveImageIndex(0);
+              }}
+              style={{
+                position: "fixed",
+                top: "20px",
+                right: "20px",
+                background: colors.card,
+                border: `1px solid ${colors.border}`,
+                borderRadius: "8px",
+                width: "40px",
+                height: "40px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: colors.light,
+                fontSize: "24px",
+                zIndex: 1001,
+              }}
+              aria-label="Close modal"
+            >
+              ✕
+            </button>
+
+            {selectedProject.images && selectedProject.images.length > 0 && (
+              <div>
+                <div
+                  style={{
+                    position: "relative",
+                    width: "100%",
+                    height: isMobile ? "240px" : "420px",
+                    background: colors.background,
+                    borderRadius: "24px 24px 0 0",
+                    overflow: "hidden",
+                  }}
+                >
+                  <img
+                    src={selectedProject.images[activeImageIndex]}
+                    alt={`${selectedProject.name} - Image ${activeImageIndex + 1}`}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      animation: "imageFade 200ms ease-in-out",
+                    }}
+                  />
+
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "16px",
+                      right: "16px",
+                      background: "rgba(0, 0, 0, 0.6)",
+                      color: colors.light,
+                      padding: "6px 12px",
+                      borderRadius: "6px",
+                      fontSize: "12px",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {activeImageIndex + 1} / {selectedProject.images.length}
+                  </div>
+
+                  {activeImageIndex > 0 && (
+                    <button
+                      onClick={() => setActiveImageIndex(activeImageIndex - 1)}
+                      style={{
+                        position: "absolute",
+                        left: "16px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        background: "rgba(0, 0, 0, 0.5)",
+                        border: "none",
+                        color: colors.light,
+                        width: "40px",
+                        height: "40px",
+                        borderRadius: "50%",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "18px",
+                        transition: "background 200ms ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.background = "rgba(0, 0, 0, 0.8)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.background = "rgba(0, 0, 0, 0.5)";
+                      }}
+                      aria-label="Previous image"
+                    >
+                      ←
+                    </button>
+                  )}
+
+                  {activeImageIndex < selectedProject.images.length - 1 && (
+                    <button
+                      onClick={() => setActiveImageIndex(activeImageIndex + 1)}
+                      style={{
+                        position: "absolute",
+                        right: "16px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        background: "rgba(0, 0, 0, 0.5)",
+                        border: "none",
+                        color: colors.light,
+                        width: "40px",
+                        height: "40px",
+                        borderRadius: "50%",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "18px",
+                        transition: "background 200ms ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.background = "rgba(0, 0, 0, 0.8)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.background = "rgba(0, 0, 0, 0.5)";
+                      }}
+                      aria-label="Next image"
+                    >
+                      →
+                    </button>
+                  )}
+                </div>
+
+                {selectedProject.images.length > 1 && (
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "8px",
+                      padding: "16px",
+                      background: colors.background,
+                      overflowX: "auto",
+                      borderBottom: `1px solid ${colors.border}`,
+                    }}
+                  >
+                    {selectedProject.images.map((img, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setActiveImageIndex(idx)}
+                        style={{
+                          minWidth: "80px",
+                          height: "56px",
+                          borderRadius: "8px",
+                          border:
+                            activeImageIndex === idx
+                              ? `2px solid ${colors.accent}`
+                              : `1px solid ${colors.border}`,
+                          padding: 0,
+                          cursor: "pointer",
+                          overflow: "hidden",
+                          background: "transparent",
+                        }}
+                        aria-label={`View image ${idx + 1}`}
+                      >
+                        <img
+                          src={img}
+                          alt={`Thumbnail ${idx + 1}`}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div style={{ padding: "32px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "8px",
+                  marginBottom: "16px",
+                }}
+              >
+                {selectedProject.categories.map((cat) => (
+                  <span
+                    key={cat}
+                    style={{
+                      fontFamily: "JetBrains Mono, monospace",
+                      fontSize: "0.7rem",
+                      fontWeight: 700,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      color: colors.accent,
+                    }}
+                  >
+                    {cat}
+                  </span>
+                ))}
+              </div>
+
+              <h2
+                style={{
+                  margin: "0 0 8px",
+                  color: colors.light,
+                  fontSize: "1.75rem",
+                  fontWeight: 700,
+                }}
+              >
+                {selectedProject.name}
+              </h2>
+
+              {selectedProject.type && (
+                <span
+                  style={{
+                    display: "inline-block",
+                    background: colors.accentGlow,
+                    color: colors.accent,
+                    padding: "6px 12px",
+                    borderRadius: "999px",
+                    fontSize: "0.8rem",
+                    fontWeight: 600,
+                    marginBottom: "16px",
+                  }}
+                >
+                  {selectedProject.type}
+                </span>
+              )}
+
+              <p
+                style={{
+                  margin: "0 0 24px",
+                  lineHeight: 1.8,
+                  color: colors.text,
+                  fontSize: "1rem",
+                }}
+              >
+                {selectedProject.summary}
+              </p>
+
+              {selectedProject.problem && (
+                <div style={{ marginBottom: "24px" }}>
+                  <h3
+                    style={{
+                      margin: "0 0 12px",
+                      color: colors.light,
+                      fontSize: "1.1rem",
+                      fontWeight: 700,
+                    }}
+                  >
+                    The Problem
+                  </h3>
+                  <p
+                    style={{
+                      margin: 0,
+                      lineHeight: 1.75,
+                      color: colors.muted,
+                      fontSize: "0.95rem",
+                    }}
+                  >
+                    {selectedProject.problem}
+                  </p>
+                </div>
+              )}
+
+              {selectedProject.features &&
+                selectedProject.features.length > 0 && (
+                  <div style={{ marginBottom: "24px" }}>
+                    <h3
+                      style={{
+                        margin: "0 0 16px",
+                        color: colors.light,
+                        fontSize: "1.1rem",
+                        fontWeight: 700,
+                      }}
+                    >
+                      Key Features
+                    </h3>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: isMobile
+                          ? "1fr"
+                          : "repeat(2, 1fr)",
+                        gap: "12px",
+                      }}
+                    >
+                      {selectedProject.features.map((feature, idx) => (
+                        <div
+                          key={idx}
+                          style={{
+                            background: colors.background,
+                            border: `1px solid ${colors.border}`,
+                            borderRadius: "12px",
+                            padding: "16px",
+                          }}
+                        >
+                          <h4
+                            style={{
+                              margin: "0 0 8px",
+                              color: colors.light,
+                              fontSize: "0.95rem",
+                              fontWeight: 700,
+                            }}
+                          >
+                            {feature.title}
+                          </h4>
+                          <p
+                            style={{
+                              margin: 0,
+                              color: colors.muted,
+                              fontSize: "0.85rem",
+                              lineHeight: 1.6,
+                            }}
+                          >
+                            {feature.desc}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+              {selectedProject.tech && selectedProject.tech.length > 0 && (
+                <div>
+                  <h3
+                    style={{
+                      margin: "0 0 12px",
+                      color: colors.light,
+                      fontSize: "1.1rem",
+                      fontWeight: 700,
+                    }}
+                  >
+                    Tech Stack
+                  </h3>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: "8px",
+                    }}
+                  >
+                    {selectedProject.tech.map((toolTag) => (
+                      <span
+                        key={toolTag}
+                        style={{
+                          borderRadius: "999px",
+                          border: `1px solid ${colors.accent}`,
+                          background: "transparent",
+                          color: colors.accent,
+                          padding: "6px 12px",
+                          fontFamily: "JetBrains Mono, monospace",
+                          fontSize: "0.75rem",
+                          fontWeight: 600,
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        {toolTag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <footer
         data-reveal-id="footer"
