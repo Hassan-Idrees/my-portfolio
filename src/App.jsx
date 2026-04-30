@@ -1053,25 +1053,16 @@ function App() {
                 Pakistan, currently serving as Team Lead at Flowveo — where I
                 lead a team delivering production-ready MVPs, SaaS platforms,
                 and intelligent automation systems for clients across
-                industries. Over the past two years, I've built and shipped
-                AI-powered web applications, RAG systems, and multi-agent
-                workflows integrating OpenAI GPT and Anthropic Claude —
-                alongside scalable automation pipelines on n8n, Make, and
-                Zapier. I work with tools like Lovable, Replit, Supabase,
-                Firebase, HubSpot, and GoHighLevel to take products from concept
-                to launch quickly and reliably. I hold a Bachelor's degree in
-                Information Technology and was selected as a Stanford-funded
-                Career-Prep Fellow at Amal Academy from 4,500+ applicants — an
-                experience that sharpened my communication, leadership, and
-                cross-functional collaboration skills. I thrive working with
-                European startups and agencies as a remote partner — delivering
-                clear documentation, async-friendly communication, and results
-                on deadline.With 4+ years of hands-on experience, I help
-                startups, agencies, and businesses go from idea to a fully
-                functional, production-ready product — fast. I build scalable
-                apps, SaaS platforms, internal tools, AI-powered dashboards, and
-                intelligent automation workflows — without the overhead of
-                traditional development.
+                industries. I've built and shipped AI-powered web applications,
+                RAG systems, and multi-agent workflows integrating OpenAI GPT
+                and Anthropic Claude — alongside scalable automation pipelines
+                on n8n, Make, and Zapier. I work with tools like Lovable,
+                Replit, Supabase, Firebase, HubSpot, and GoHighLevel to take
+                products from concept to launch quickly and reliably. Alongside
+                my team role, I work as an independent freelancer serving
+                startups, agencies, and businesses worldwide — bringing the same
+                production-ready quality to every engagement, regardless of
+                scale or timezone.
               </p>
             </div>
           </div>
