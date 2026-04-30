@@ -1,0 +1,84 @@
+/* Prevent horizontal scroll on mobile */
+html, body, #root {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Hero image mask to softly blend edges into dark background (#111113) */
+.hero-image {
+  display: block;
+}
+
+.hero-image__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 85%, transparent 100%),
+                      linear-gradient(to bottom, transparent 0%, black 5%, black 75%, transparent 100%);
+  -webkit-mask-composite: destination-in;
+  mask-image: linear-gradient(to right, transparent 0%, black 8%, black 85%, transparent 100%),
+              linear-gradient(to bottom, transparent 0%, black 5%, black 75%, transparent 100%);
+  mask-composite: intersect;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  /* Keep center crisp while only softening edges */
+  image-rendering: auto;
+}
+
+/* Ensure the container doesn't clip natural soft edges on some layouts */
+.hero-image {
+  overflow: visible;
+}
+
+/* Mobile circular hero image with orange border glow */
+.hero-image--mobile {
+  width: 160px;
+  height: 160px;
+  margin: 20px auto 0;
+  padding: 3px;
+  background: linear-gradient(135deg, #e8622c, #c44d1a, #f2854f);
+  border-radius: 50%;
+  box-shadow: 0 0 40px rgba(232, 98, 44, 0.12);
+  animation: heroImageGlow 4s ease-in-out infinite;
+}
+
+.hero-image--mobile-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #111113;
+}
+
+.hero-image__img--mobile {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+  /* Remove mask on mobile */
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+@keyframes heroImageGlow {
+  0%, 100% {
+    box-shadow: 0 0 40px rgba(232, 98, 44, 0.12);
+  }
+  50% {
+    box-shadow: 0 0 60px rgba(232, 98, 44, 0.2);
+  }
+}
+
+/* Responsive improvements */
+@media (max-width: 480px) {
+  .hero-image__img {
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 85%, transparent 100%),
+                        linear-gradient(to bottom, transparent 0%, black 8%, black 72%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0%, black 10%, black 85%, transparent 100%),
+                linear-gradient(to bottom, transparent 0%, black 8%, black 72%, transparent 100%);
+  }
+}

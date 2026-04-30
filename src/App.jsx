@@ -586,7 +586,7 @@ function App() {
         </div>
       </header>
 
-      <main style={{ paddingTop: '70px', position: 'relative', zIndex: 2 }} role="main" aria-label="Primary content">
+      <main style={{ paddingTop: '0px', position: 'relative', zIndex: 2 }} role="main" aria-label="Primary content">
         <a
           href="#home"
           style={{
@@ -611,14 +611,14 @@ function App() {
         >
           Skip to main content
         </a>
-        <section id="home" style={{ minHeight: 'auto', padding: isMobile ? '100px 24px 40px' : '120px 24px 60px', scrollMarginTop: '90px' }}>
+        <section id="home" style={{ minHeight: 'auto', padding: isMobile ? '90px 24px 40px' : isTablet ? '80px 24px 60px' : isLaptop ? '80px 24px 40px' : viewportWidth >= 1400 ? '110px 24px 60px' : '100px 24px 60px', scrollMarginTop: '90px' }}>
           <div style={{ maxWidth: '1200px', width: '100%', margin: '0 auto' }}>
             <div
               style={{
                 display: 'flex',
                 flexDirection: isMobile ? 'column-reverse' : 'row',
-                alignItems: 'center',
-                gap: isMobile ? '32px' : isTablet ? '30px' : '40px',
+                alignItems: isLaptop ? 'flex-start' : 'center',
+                gap: isMobile ? '32px' : isTablet ? '30px' : isLaptop ? '24px' : '40px',
               }}
             >
               <div
@@ -627,7 +627,7 @@ function App() {
                   textAlign: isMobile ? 'center' : 'left',
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: isMobile ? 'center' : 'flex-start', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: isMobile ? 'center' : 'flex-start', marginBottom: isLaptop ? '16px' : '20px', marginTop: 0 }}>
                   <span
                     style={{
                       display: 'inline-flex',
@@ -671,7 +671,7 @@ function App() {
 
                 <h1
                   style={{
-                    margin: '0 0 16px',
+                    margin: `0 0 ${isLaptop ? '13px' : '16px'}`,
                     fontSize: 'clamp(30px, 4vw, 58px)',
                     fontWeight: 900,
                     lineHeight: isTablet ? 1.06 : 1.04,
@@ -694,7 +694,7 @@ function App() {
                     fontSize: 'clamp(14px, 1.5vw, 17px)',
                     lineHeight: 1.7,
                     color: colors.muted,
-                    margin: '0 0 28px',
+                    margin: `0 0 ${isLaptop ? '22px' : '28px'}`,
                   }}
                 >
                   Building MVPs, SaaS Platforms &amp; AI-Powered Automations. I help startups &amp; businesses go from idea to production — fast.
@@ -706,7 +706,7 @@ function App() {
                     flexDirection: isMobile ? 'column' : 'row',
                     gap: '12px',
                     justifyContent: isMobile ? 'center' : 'flex-start',
-                    marginBottom: '36px',
+                    marginBottom: isLaptop ? '29px' : '36px',
                     width: isMobile ? '100%' : 'auto',
                   }}
                 >
@@ -751,10 +751,11 @@ function App() {
 
                 <div
                   style={{
-                    display: 'flex',
-                    gap: 'clamp(24px, 4vw, 56px)',
-                    flexWrap: 'wrap',
-                    justifyContent: isMobile ? 'center' : 'flex-start',
+                    display: isMobile ? 'grid' : 'flex',
+                    gridTemplateColumns: isMobile ? 'repeat(3, 1fr)' : undefined,
+                    gap: isMobile ? '16px' : 'clamp(24px, 4vw, 56px)',
+                    width: isMobile ? '100%' : 'auto',
+                    justifyContent: isMobile ? undefined : 'flex-start',
                   }}
                 >
                   {[
@@ -762,13 +763,13 @@ function App() {
                     { value: '50+', label: 'Projects Delivered' },
                     { value: '100%', label: 'Client Satisfaction' },
                   ].map((item) => (
-                    <div key={item.label} style={{ textAlign: isMobile ? 'center' : 'left' }}>
+                    <div key={item.label} style={{ textAlign: 'center' }}>
                       <p
                         style={{
                           margin: 0,
                           color: colors.accent,
                           fontWeight: 900,
-                          fontSize: 'clamp(24px, 3vw, 40px)',
+                          fontSize: isMobile ? 'clamp(22px, 6vw, 28px)' : 'clamp(24px, 3vw, 40px)',
                           lineHeight: 1,
                         }}
                       >
@@ -778,7 +779,7 @@ function App() {
                         style={{
                           margin: '8px 0 0',
                           color: colors.muted,
-                          fontSize: 'clamp(8px, 0.8vw, 10px)',
+                          fontSize: isMobile ? '8px' : 'clamp(8px, 0.8vw, 10px)',
                           fontWeight: 600,
                           textTransform: 'uppercase',
                           letterSpacing: '1.3px',
@@ -791,43 +792,59 @@ function App() {
                 </div>
               </div>
 
-              <div
-                style={{
-                  width: isMobile ? '100%' : '45%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                }}
-              >
                 <div
                   style={{
-                    width: '100%',
-                    maxWidth: isMobile
-                      ? '220px'
-                      : isTablet
-                        ? '300px'
-                        : isLaptop
-                          ? '350px'
-                          : viewportWidth >= 1400
-                            ? '480px'
-                            : '420px',
-                    margin: isMobile ? '0 auto' : 0,
+                    width: isMobile ? '100%' : '45%',
+                    display: 'flex',
+                    justifyContent: 'center',
                   }}
                 >
-                  <img
-                    src="https://res.cloudinary.com/dd9zq4nvl/image/upload/v1777256507/real_image-removebg-preview_kbmmxu.png"
-                    alt="Muhammad Hassan Idrees, AI Automation Engineer and SaaS Builder"
-                    loading="lazy"
-                    style={{
-                      width: '100%',
-                      height: 'auto',
-                      maxHeight: '85vh',
-                      objectFit: 'contain',
-                      objectPosition: 'center bottom',
-                      display: 'block',
-                    }}
-                  />
+                  {isMobile ? (
+                    // Mobile: Circular image with orange border glow
+                    <div className="hero-image--mobile">
+                      <div className="hero-image--mobile-inner">
+                        <img
+                          className="hero-image__img--mobile"
+                          src="https://res.cloudinary.com/dd9zq4nvl/image/upload/v1777506102/ChatGPT_Image_Apr_30_2026_04_29_24_AM-Photoroom_qeaon1.png"
+                          alt="Muhammad Hassan Idrees, AI Automation Engineer and SaaS Builder"
+                          loading="lazy"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    // Desktop: Masked image with transparent fade blending
+                    <div
+                      style={{
+                        width: '100%',
+                        maxWidth: isTablet
+                          ? '300px'
+                          : isLaptop
+                            ? '350px'
+                            : viewportWidth >= 1400
+                              ? '480px'
+                              : '420px',
+                        margin: 0,
+                      }}
+                    >
+                      <div className="hero-image">
+                        <img
+                          className="hero-image__img"
+                          src="https://res.cloudinary.com/dd9zq4nvl/image/upload/v1777506102/ChatGPT_Image_Apr_30_2026_04_29_24_AM-Photoroom_qeaon1.png"
+                          alt="Muhammad Hassan Idrees, AI Automation Engineer and SaaS Builder"
+                          loading="lazy"
+                          style={{
+                            width: '100%',
+                            height: 'auto',
+                            maxHeight: '85vh',
+                            objectFit: 'contain',
+                            objectPosition: 'center bottom',
+                            display: 'block',
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
             </div>
           </div>
         </section>
