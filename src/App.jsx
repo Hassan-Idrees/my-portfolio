@@ -1348,13 +1348,13 @@ function App() {
               style={{
                 display: "grid",
                 gap: "24px",
-                gridTemplateColumns: isMobile
-                  ? "1fr"
-                  : "repeat(2, minmax(0, 1fr))",
+                gridTemplateColumns: isMobile ? "1fr" : isTablet ? "repeat(2, minmax(0, 1fr))" : "repeat(3, minmax(0, 1fr))",
               }}
             >
               {projects.map((project) => {
                 const isHovered = hoveredCard === project.name;
+                const visibleTech = (project.tech || []).slice(0, 4);
+                const extraTechCount = (project.tech || []).length - visibleTech.length;
 
                 return (
                   <article
@@ -1363,151 +1363,104 @@ function App() {
                       setSelectedProject(project);
                       setActiveImageIndex(0);
                     }}
-                    onMouseEnter={() =>
-                      !isTouch && setHoveredCard(project.name)
-                    }
+                    onMouseEnter={() => !isTouch && setHoveredCard(project.name)}
                     onMouseLeave={() => !isTouch && setHoveredCard(null)}
                     style={{
-                      ...cardBase,
-                      padding: 0,
+                      background: colors.card,
+                      border: `1px solid ${isHovered && !isTouch ? colors.accent : colors.border}`,
+                      borderRadius: "20px",
                       overflow: "hidden",
+                      cursor: "pointer",
+                      transition: "transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease",
+                      transform: isHovered && !isTouch ? "translateY(-4px)" : "translateY(0)",
+                      boxShadow: isHovered && !isTouch ? "0 12px 40px rgba(232,98,44,0.15)" : "none",
                       display: "flex",
                       flexDirection: "column",
-                      cursor: "pointer",
-                      transform:
-                        isHovered && !isTouch
-                          ? "translateY(-8px)"
-                          : "translateY(0)",
-                      boxShadow:
-                        isHovered && !isTouch
-                          ? `0 0 0 1px ${colors.accentGlow}, 0 24px 50px rgba(0,0,0,0.35)`
-                          : `0 0 0 1px ${colors.accentGlow}, 0 12px 30px rgba(0,0,0,0.2)`,
-                      transition:
-                        "transform 280ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1)",
                     }}
                   >
+                    {/* Thumbnail Section */}
                     {project.thumbnail ? (
-                      <img
-                        src={project.thumbnail}
-                        alt={project.name}
-                        style={{
-                          width: "100%",
-                          height: isMobile ? "140px" : "170px",
-                          objectFit: "cover",
-                          borderRadius: "24px 24px 0 0",
-                        }}
-                      />
-                    ) : (
-                      <div
-                        style={{
-                          position: "relative",
-                          width: "100%",
-                          height: isMobile ? "140px" : "170px",
-                          background: `linear-gradient(135deg, ${colors.accent}22, ${colors.accentDark}44, ${colors.accent}22)`,
-                          overflow: "hidden",
-                        }}
-                      >
-                        <div
-                          aria-hidden="true"
+                      <div style={{ width: "100%", height: "200px", background: "#0d0d0f", position: "relative", overflow: "hidden" }}>
+                        <img
+                          src={project.thumbnail}
+                          alt={project.name}
                           style={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            width: "30%",
-                            height: "100%",
-                            background:
-                              "linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)",
-                            animation: "shineSwipe 3s ease-in-out infinite",
+                            width: "100%",
+                            height: "200px",
+                            objectFit: "contain",
+                            objectPosition: "center",
+                            background: "#0d0d0f",
+                            borderRadius: "16px 16px 0 0",
+                            padding: "12px",
+                            boxSizing: "border-box",
                           }}
                         />
-                      </div>
-                    )}
-                    <div style={{ padding: "20px 24px", position: "relative" }}>
-                      {isHovered && !isTouch && (
                         <div
+                          aria-hidden={!isHovered}
                           style={{
                             position: "absolute",
-                            top: "20px",
-                            right: "24px",
+                            inset: 0,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            background: isHovered ? "rgba(0,0,0,0.45)" : "transparent",
                             color: colors.accent,
-                            fontSize: "0.9rem",
                             fontWeight: 600,
+                            fontSize: 14,
+                            transition: "background 180ms ease, opacity 180ms ease",
+                            pointerEvents: "none",
                           }}
                         >
-                          View Details →
+                          {isHovered && !isTouch ? "View Details →" : null}
                         </div>
-                      )}
-                      <div
-                        style={{
-                          display: "flex",
-                          flexWrap: "wrap",
-                          gap: "8px",
-                          marginBottom: "10px",
-                        }}
-                      >
-                        {project.categories.map((cat) => (
-                          <span
-                            key={cat}
-                            style={{
-                              fontFamily: "JetBrains Mono, monospace",
-                              fontSize: "0.7rem",
-                              fontWeight: 700,
-                              letterSpacing: "0.08em",
-                              textTransform: "uppercase",
-                              color: colors.accent,
-                            }}
-                          >
+                      </div>
+                    ) : (
+                      <div style={{ width: "100%", height: "160px", background: colors.background, display: "flex", alignItems: "center", justifyContent: "center", borderBottom: `1px solid ${colors.border}` }}>
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.4 }}>
+                          <rect x="3" y="3" width="8" height="8" rx="2" stroke={colors.muted} strokeWidth="1.4"/>
+                          <rect x="13" y="3" width="8" height="8" rx="2" stroke={colors.muted} strokeWidth="1.4"/>
+                          <rect x="3" y="13" width="8" height="8" rx="2" stroke={colors.muted} strokeWidth="1.4"/>
+                          <rect x="13" y="13" width="8" height="8" rx="2" stroke={colors.muted} strokeWidth="1.4"/>
+                        </svg>
+                      </div>
+                    )}
+
+                    {/* Content Section */}
+                    <div style={{ padding: "20px", display: "flex", flexDirection: "column", flex: 1 }}>
+                      <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "8px" }}>
+                        {(project.categories || []).map((cat) => (
+                          <span key={cat} style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: colors.accentLight, background: "rgba(232,98,44,0.1)", borderRadius: 999, padding: "3px 10px" }}>
                             {cat}
                           </span>
                         ))}
                       </div>
-                      <h3
-                        style={{
-                          margin: "0 0 8px",
-                          color: colors.light,
-                          fontSize: "1.24rem",
-                          fontWeight: 700,
-                        }}
-                      >
-                        {project.name}
-                      </h3>
-                      <p
-                        style={{
-                          margin: "0 0 14px",
-                          lineHeight: 1.75,
-                          color: colors.text,
-                          fontSize: "0.95rem",
-                        }}
-                      >
-                        {project.summary}
-                      </p>
-                      <div
-                        style={{
-                          display: "flex",
-                          flexWrap: "wrap",
-                          gap: "8px",
-                        }}
-                      >
-                        {project.tech.map((toolTag) => (
-                          <span
-                            key={toolTag}
-                            style={{
-                              borderRadius: "999px",
-                              border: `1px solid ${colors.accent}`,
-                              background: "transparent",
-                              color: colors.accent,
-                              padding: "6px 12px",
-                              fontFamily: "JetBrains Mono, monospace",
-                              fontSize: "0.75rem",
-                              fontWeight: 600,
-                              lineHeight: 1.2,
-                            }}
-                          >
-                            {toolTag}
-                          </span>
-                        ))}
+
+                      <div style={{ display: "block" }}>
+                        <div style={{ fontSize: "1rem", fontWeight: 700, color: colors.light, lineHeight: 1.4, margin: "10px 0 8px", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                          {project.name}
+                        </div>
+
+                        <div style={{ fontSize: "0.82rem", color: colors.muted, lineHeight: 1.6, margin: "0 0 16px", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                          {project.summary}
+                        </div>
+
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "16px" }}>
+                          {visibleTech.map((toolTag) => (
+                            <span key={toolTag} style={{ fontSize: "0.72rem", color: colors.text, background: colors.background, border: `1px solid ${colors.border}`, borderRadius: 999, padding: "3px 10px" }}>
+                              {toolTag}
+                            </span>
+                          ))}
+                          {extraTechCount > 0 && (
+                            <span style={{ fontSize: "0.72rem", color: colors.muted, background: colors.background, border: `1px solid ${colors.border}`, borderRadius: 999, padding: "3px 10px" }}>
+                              +{extraTechCount} more
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div style={{ borderTop: `1px solid ${colors.border}`, paddingTop: 14, marginTop: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div style={{ color: colors.muted, fontSize: "0.75rem" }}>{project.type || ""}</div>
+                        <div style={{ color: colors.accent, fontSize: "0.8rem", fontWeight: 600 }}>View Details →</div>
                       </div>
                     </div>
                   </article>
@@ -1941,8 +1894,11 @@ function App() {
                     alt={`${selectedProject.name} - Image ${activeImageIndex + 1}`}
                     style={{
                       width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
+                      height: isMobile ? "240px" : "420px",
+                      objectFit: "contain",
+                      objectPosition: "center",
+                      background: "#0d0d0f",
+                      borderRadius: "16px 16px 0 0",
                       animation: "imageFade 200ms ease-in-out",
                     }}
                   />
@@ -2064,9 +2020,12 @@ function App() {
                           src={img}
                           alt={`Thumbnail ${idx + 1}`}
                           style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
+                            width: "80px",
+                            height: "56px",
+                            objectFit: "contain",
+                            objectPosition: "center",
+                            background: "#0d0d0f",
+                            borderRadius: "6px",
                           }}
                         />
                       </button>
