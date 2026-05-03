@@ -107,6 +107,7 @@ export default function App() {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [hoveredService, setHoveredService] = useState(null);
   const [hoveredTool, setHoveredTool] = useState("");
+  const programmaticSectionRef = useRef(null);
 
   useEffect(() => {
     const onResize = () => {
@@ -119,6 +120,17 @@ export default function App() {
 
     const onScroll = () => {
       setScrolled(window.scrollY > 10);
+      if (programmaticSectionRef.current) {
+        const target = document.getElementById(programmaticSectionRef.current);
+        if (!target) return;
+
+        const rect = target.getBoundingClientRect();
+        if (rect.top <= 120 && rect.bottom > 120) {
+          setActiveSection(programmaticSectionRef.current);
+          programmaticSectionRef.current = null;
+        }
+        return;
+      }
       for (const s of sections) {
         const el = document.getElementById(s.id);
         if (!el) continue;
@@ -193,6 +205,8 @@ export default function App() {
 
   const navigateToSection = (sectionId) => (e) => {
     e.preventDefault();
+    programmaticSectionRef.current = sectionId;
+    setActiveSection(sectionId);
     const target = document.getElementById(sectionId);
     if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
     setMobileMenuOpen(false);
@@ -251,6 +265,7 @@ export default function App() {
         setMobileMenuOpen={setMobileMenuOpen}
         navItems={sections}
         activeSection={activeSection}
+        setActiveSection={setActiveSection}
         navigateToSection={navigateToSection}
       />
 

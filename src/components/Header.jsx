@@ -9,14 +9,13 @@ export default function Header({
   setMobileMenuOpen,
   navItems,
   activeSection,
+  setActiveSection,
   navigateToSection,
 }) {
   const [hoveredNav, setHoveredNav] = useState(null);
-  const [pressedNav, setPressedNav] = useState(null);
 
   const handleNavClick = (sectionId) => (e) => {
-    setPressedNav(sectionId);
-    setTimeout(() => setPressedNav(null), 300);
+    setActiveSection(sectionId);
     navigateToSection(sectionId)(e);
   };
 
@@ -84,7 +83,6 @@ export default function Header({
             {navItems.map((section) => {
               const isActive = activeSection === section.id;
               const isHovered = hoveredNav === section.id && !isActive;
-              const isPressed = pressedNav === section.id;
 
               // Determine background and text color
               let bg = "transparent";
@@ -92,13 +90,7 @@ export default function Header({
               let scale = "scale(1)";
               let boxShadow = "none";
 
-              if (isPressed) {
-                // Click effect — filled solid orange, scale down slightly
-                bg = colors.accent;
-                color = "#ffffff";
-                scale = "scale(0.96)";
-                boxShadow = `0 0 0 3px rgba(232,98,44,0.25)`;
-              } else if (isActive) {
+              if (isActive) {
                 // Active — solid orange gradient background
                 bg = `linear-gradient(135deg, ${colors.accent}, #c44d1a)`;
                 color = "#ffffff";
