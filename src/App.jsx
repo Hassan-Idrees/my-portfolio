@@ -9,8 +9,8 @@ import Stack from "./components/Stack";
 import ProjectsList from "./components/ProjectsList";
 import Reviews from "./components/Reviews";
 import Contact from "./components/Contact";
+import "./styles.css";
 
-// Data used across components (kept minimal but representative)
 const sections = [
   { id: "home", label: "Home" },
   { id: "about", label: "About" },
@@ -21,33 +21,21 @@ const sections = [
   { id: "contact", label: "Contact" },
 ];
 
-const services = [
-  { id: "automation", title: "AI Automations", text: "Build AI workflows and integrations." },
-  { id: "saas", title: "SaaS MVPs", text: "From idea to production-ready MVPs." },
-  { id: "consulting", title: "Consulting", text: "Product and engineering consulting." },
-];
-
-const techStackCategories = [
-  { category: "Frontend", tools: ["React", "Vite", "Tailwind"] },
-  { category: "Backend", tools: ["Node", "Express", "Postgres"] },
-  { category: "AI + Automation", tools: ["OpenAI", "Claude", "n8n", "Zapier"] },
-];
-
 const projects = [
   {
     id: "p1",
     name: "AI Outreach Assistant",
     type: "Automation",
-    summary: "Automates lead qualification, follow-ups, and CRM updates.",
+    summary: "Automates lead qualification, follow-ups, and CRM updates using AI-powered n8n workflows integrated with HubSpot.",
     categories: ["Automation", "B2B"],
-    tech: ["OpenAI", "n8n", "HubSpot", "Postgres"],
+    tech: ["OpenAI", "n8n", "HubSpot", "PostgreSQL"],
     images: [],
   },
   {
     id: "p2",
     name: "Client Portal MVP",
     type: "SaaS",
-    summary: "A responsive client portal with onboarding and billing flows.",
+    summary: "A responsive client portal with onboarding flows, billing management, and real-time project tracking.",
     categories: ["SaaS", "Web App"],
     tech: ["React", "Vite", "Supabase", "Stripe"],
     images: [],
@@ -56,16 +44,35 @@ const projects = [
     id: "p3",
     name: "Support Copilot",
     type: "AI Product",
-    summary: "Internal support assistant for knowledge search and draft replies.",
+    summary: "Internal AI support assistant with RAG-powered knowledge search and automated draft replies using Claude.",
     categories: ["AI", "Internal Tool"],
-    tech: ["Claude", "RAG", "Node", "Postgres"],
+    tech: ["Claude API", "RAG", "Node.js", "PostgreSQL"],
     images: [],
   },
 ];
 
 const reviews = [
-  { id: "r1", person: "Client A", role: "Founder", quote: "Great work!", rating: 5 },
-  { id: "r2", person: "Client B", role: "Operations Lead", quote: "Fast, clear, and reliable delivery.", rating: 5 },
+  {
+    id: "r1",
+    person: "Sarah M.",
+    role: "Startup Founder",
+    quote: "Delivered our MVP in just one week. The quality was production-ready from day one. Absolutely exceeded expectations.",
+    rating: 5,
+  },
+  {
+    id: "r2",
+    person: "James K.",
+    role: "Agency Owner",
+    quote: "The AI automation workflows he built saved us 20+ hours per week. Best investment we've made this year.",
+    rating: 5,
+  },
+  {
+    id: "r3",
+    person: "Lisa R.",
+    role: "Product Manager",
+    quote: "Professional, fast, and proactive. He didn't just build what we asked — he suggested improvements we hadn't thought of.",
+    rating: 5,
+  },
 ];
 
 const colors = {
@@ -90,17 +97,16 @@ export default function App() {
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   const [isLaptop, setIsLaptop] = useState(false);
-  const [viewportWidth, setViewportWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  const [viewportWidth, setViewportWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1200
+  );
   const [isTouch, setIsTouch] = useState(false);
   const [mouseGlowPosition, setMouseGlowPosition] = useState({ x: 0, y: 0 });
   const [revealedSections, setRevealedSections] = useState({});
-  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
   const [selectedProject, setSelectedProject] = useState(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [hoveredService, setHoveredService] = useState(null);
   const [hoveredTool, setHoveredTool] = useState("");
-
-  const navRefs = useRef({});
 
   useEffect(() => {
     const onResize = () => {
@@ -113,8 +119,6 @@ export default function App() {
 
     const onScroll = () => {
       setScrolled(window.scrollY > 10);
-
-      // determine active section roughly by bounding boxes
       for (const s of sections) {
         const el = document.getElementById(s.id);
         if (!el) continue;
@@ -143,7 +147,6 @@ export default function App() {
       setMouseGlowPosition({ x: e.clientX, y: e.clientY });
       setIsTouch(e.pointerType === "touch");
     };
-
     window.addEventListener("pointermove", onPointerMove);
     return () => window.removeEventListener("pointermove", onPointerMove);
   }, []);
@@ -160,7 +163,7 @@ export default function App() {
           }
         });
       },
-      { threshold: 0.12 }
+      { threshold: 0.12, rootMargin: "50px" }
     );
 
     ids.forEach((id) => {
@@ -170,18 +173,6 @@ export default function App() {
 
     return () => observer.disconnect();
   }, []);
-
-  useEffect(() => {
-    const updateIndicator = () => {
-      const active = navRefs.current[activeSection];
-      if (active && !isMobile) {
-        setIndicatorStyle({ left: active.offsetLeft, width: active.offsetWidth });
-      }
-    };
-    updateIndicator();
-    window.addEventListener("resize", updateIndicator);
-    return () => window.removeEventListener("resize", updateIndicator);
-  }, [activeSection, isMobile]);
 
   useEffect(() => {
     const onKey = (e) => {
@@ -207,18 +198,8 @@ export default function App() {
     setMobileMenuOpen(false);
   };
 
-  const page = {
-    width: "100%",
-    minHeight: "100vh",
-    background: colors.background,
-    color: colors.text,
-    fontFamily: "Inter, sans-serif",
-    position: "relative",
-    margin: 0,
-    padding: 0,
-  };
-
   const shell = { width: "min(1200px, calc(100% - 32px))", margin: "0 auto" };
+
   const cardBase = {
     background: colors.card,
     border: `1px solid ${colors.border}`,
@@ -226,9 +207,8 @@ export default function App() {
     boxShadow: `0 0 0 1px ${colors.accentGlow}, 0 20px 60px rgba(0,0,0,0.28)`,
     transition: "transform 180ms ease, background 180ms ease, border-color 180ms ease",
   };
-  const sectionStyle = { padding: "clamp(40px, 8vw, 88px) 0" };
 
-  const navItems = sections;
+  const sectionStyle = { padding: "clamp(40px, 8vw, 88px) 0" };
 
   const getRevealStyle = (sectionId) => ({
     opacity: revealedSections[sectionId] ? 1 : 0,
@@ -237,7 +217,19 @@ export default function App() {
   });
 
   return (
-    <div style={page}>
+    <div
+      style={{
+        width: "100%",
+        minHeight: "100vh",
+        background: colors.background,
+        color: colors.text,
+        fontFamily: "Inter, sans-serif",
+        position: "relative",
+        margin: 0,
+        padding: 0,
+      }}
+    >
+      {/* Mouse glow effect */}
       <div
         aria-hidden="true"
         style={{
@@ -245,7 +237,7 @@ export default function App() {
           inset: 0,
           pointerEvents: "none",
           zIndex: 1,
-          background: `radial-gradient(360px circle at ${mouseGlowPosition.x}px ${mouseGlowPosition.y}px, rgba(232,98,44,0.12), transparent 72%)`,
+          background: `radial-gradient(360px circle at ${mouseGlowPosition.x}px ${mouseGlowPosition.y}px, rgba(232,98,44,0.1), transparent 72%)`,
           transition: "background 80ms linear",
         }}
       />
@@ -257,11 +249,9 @@ export default function App() {
         isMobile={isMobile}
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
-        navItems={navItems}
+        navItems={sections}
         activeSection={activeSection}
         navigateToSection={navigateToSection}
-        navRefs={navRefs}
-        indicatorStyle={indicatorStyle}
       />
 
       <main style={{ paddingTop: "0px", position: "relative", zIndex: 2 }} role="main">
@@ -280,15 +270,79 @@ export default function App() {
           setHoveredCard={setHoveredCard}
         />
 
-        <About shell={shell} colors={colors} getRevealStyle={getRevealStyle} cardBase={cardBase} isMobile={isMobile} />
-        <Services shell={shell} colors={colors} services={services} getRevealStyle={getRevealStyle} isMobile={isMobile} isTablet={isTablet} isTouch={isTouch} hoveredService={hoveredService} setHoveredService={setHoveredService} cardBase={cardBase} />
-        <Stack shell={shell} colors={colors} techStackCategories={techStackCategories} getRevealStyle={getRevealStyle} isMobile={isMobile} isTablet={isTablet} isTouch={isTouch} hoveredTool={hoveredTool} setHoveredTool={setHoveredTool} cardBase={cardBase} />
-        <ProjectsList shell={shell} colors={colors} projects={projects} setSelectedProject={setSelectedProject} setActiveImageIndex={setActiveImageIndex} getRevealStyle={getRevealStyle} isMobile={isMobile} isTablet={isTablet} isTouch={isTouch} hoveredCard={hoveredCard} setHoveredCard={setHoveredCard} viewportWidth={viewportWidth} />
-        <Reviews shell={shell} colors={colors} reviews={reviews} getRevealStyle={getRevealStyle} isMobile={isMobile} isTablet={isTablet} isTouch={isTouch} hoveredCard={hoveredCard} setHoveredCard={setHoveredCard} cardBase={cardBase} />
-        <Contact shell={shell} colors={colors} getRevealStyle={getRevealStyle} isMobile={isMobile} isTouch={isTouch} sectionStyle={sectionStyle} />
+        <About
+          shell={shell}
+          colors={colors}
+          getRevealStyle={getRevealStyle}
+          cardBase={cardBase}
+          isMobile={isMobile}
+        />
+
+        <Services
+          shell={shell}
+          colors={colors}
+          getRevealStyle={getRevealStyle}
+          isMobile={isMobile}
+          isTablet={isTablet}
+          isTouch={isTouch}
+          hoveredService={hoveredService}
+          setHoveredService={setHoveredService}
+        />
+
+        <Stack
+          shell={shell}
+          colors={colors}
+          getRevealStyle={getRevealStyle}
+          isMobile={isMobile}
+          isTablet={isTablet}
+          isTouch={isTouch}
+          hoveredTool={hoveredTool}
+          setHoveredTool={setHoveredTool}
+        />
+
+        <ProjectsList
+          shell={shell}
+          colors={colors}
+          projects={projects}
+          setSelectedProject={setSelectedProject}
+          setActiveImageIndex={setActiveImageIndex}
+          getRevealStyle={getRevealStyle}
+          isMobile={isMobile}
+          isTablet={isTablet}
+          isTouch={isTouch}
+          hoveredCard={hoveredCard}
+          setHoveredCard={setHoveredCard}
+          viewportWidth={viewportWidth}
+        />
+
+        <Reviews
+          shell={shell}
+          colors={colors}
+          reviews={reviews}
+          getRevealStyle={getRevealStyle}
+          isMobile={isMobile}
+          isTablet={isTablet}
+          isTouch={isTouch}
+          hoveredCard={hoveredCard}
+          setHoveredCard={setHoveredCard}
+          cardBase={cardBase}
+        />
+
+        <Contact
+          shell={shell}
+          colors={colors}
+          getRevealStyle={getRevealStyle}
+          isMobile={isMobile}
+          isTouch={isTouch}
+          sectionStyle={sectionStyle}
+        />
       </main>
 
-      <Footer shell={shell} colors={colors} getRevealStyle={getRevealStyle} />
+      <Footer
+        shell={shell}
+        colors={colors}
+        getRevealStyle={getRevealStyle}
+      />
 
       <ProjectModal
         selectedProject={selectedProject}
